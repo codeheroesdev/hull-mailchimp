@@ -9,6 +9,10 @@ import AppMiddleware from "./lib/middlewares/app";
 import KueAdapter from "./util/queue/adapter/kue";
 import InstrumentationAgent from "./util/instrumentation-agent";
 
+if (process.env.LOG_LEVEL) {
+  Hull.logger.transports.console.level = process.env.LOG_LEVEL;
+}
+
 export * as jobs from "./jobs";
 export * as actions from "./actions";
 export * as notifHandlers from "./notif-handlers";

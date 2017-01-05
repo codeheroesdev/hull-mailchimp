@@ -49,16 +49,9 @@ export default class SyncAgent {
     const members = users.map(user => {
       const segment_ids = _.difference((user.segment_ids || []), (user.remove_segment_ids || []));
 
-      // TODO: investigate on custom merge fields strategies
-      // type check, empty fields, fields that doesn't exist?
-      // change the check if the users was already synced (update the traits)
-      // sync from hull -> mailchimp
       return {
         email_type: "html",
-        merge_fields: {
-          FNAME: user.first_name || "",
-          LNAME: user.last_name || ""
-        },
+        merge_fields: this.userMappingAgent.getMailchimpAttrbutes(user),
         interests: this.interestsMappingAgent.getInterestsForSegments(segment_ids),
         email_address: user.email,
         status_if_new: "subscribed"

@@ -108,4 +108,23 @@ export default class UserMappingAgent {
       .traits(traits);
   }
 
+  computeMailchimpAttributes() {
+   return _.get(this.ship, "private_settings.sync_fields_to_mailchimp") || [];
+  }
+
+  getMailchimpAttributeKeys() {
+    return this.computeMailchimpAttributes().map(f => f.name);
+  }
+
+  getMailchimpAttrbutes(hullUser) {
+    const mailchimpAttrbutes = _.reduce(this.computeMailchimpAttributes(), (fields, prop) => {
+      if (_.get(hullUser, prop.hull)) {
+        _.set(fields, prop.name, _.get(hullUser, prop.hull));
+      }
+      return fields;
+    }, {});
+
+    return mailchimpAttrbutes;
+  }
+
 }

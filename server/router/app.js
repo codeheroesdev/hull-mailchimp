@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bodyParser from "body-parser";
 import { NotifHandler } from "hull";
+import cors from "cors";
 
 import responseMiddleware from "../util/middleware/response";
 import requireConfiguration from "../util/middleware/require-configuration";
@@ -41,6 +42,8 @@ export default function AppRouter(deps) {
   router.post("/track", ...middlewareSet, actions.track, responseMiddleware);
 
   router.use("/mailchimp", hullMiddleware, appMiddleware, requireConfiguration, bodyParser.urlencoded({ extended: true }), actions.webhook);
+
+  router.get("/schema/user_fields", cors(), ...middlewareSet, actions.schemaUserFields);
 
   return router;
 }

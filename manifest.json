@@ -66,6 +66,41 @@
       "type": "object",
       "properties": {},
       "format": "hidden"
+    },
+    {
+      "name" : "sync_fields_to_mailchimp",
+      "title" : "List of User attributes to push to Mailchimp",
+      "type" : "array",
+      "format" : "table",
+      "default": [],
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "hull" : {
+            "type" : "string",
+            "format" : "trait",
+            "title" : "Hull Attribute"
+          },
+          "name" : {
+            "type" : "string",
+            "format": "select",
+            "title" : "Mailchimp Attribute",
+            "options" : {
+              "allowCreate": true,
+              "loadOptions" : "/schema/user_fields"
+            }
+          },
+          "overwrite" : {
+            "type" : "boolean",
+            "title" : "Hull overwrites Mailchimp",
+            "default" : false
+          }
+        },
+        "required" : [
+          "hull",
+          "name"
+        ]
+      }
     }
   ],
   "readme": "readme.md",

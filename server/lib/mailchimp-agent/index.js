@@ -72,4 +72,10 @@ export default class MailchimpAgent {
       });
   }
 
+  getMergeFields() {
+    return this.mailchimpClient
+      .get(`/lists/${this.listId}/merge-fields`)
+      .then(({ body }) => body);
+  }
+
 }

@@ -108,14 +108,29 @@ export default class UserMappingAgent {
       .traits(traits);
   }
 
+  /**
+   * Get list of attributes which should be synced to Mailchimp.
+   *
+   * @returns {Array} Array of objects having `name` and `hull` properties
+   */
   computeMailchimpAttributes() {
-   return _.get(this.ship, "private_settings.sync_fields_to_mailchimp") || [];
+    return _.get(this.ship, "private_settings.sync_fields_to_mailchimp") || [];
   }
 
+  /**
+   * Return only names of Mailchimp fields
+   * @returns {Array}
+   */
   getMailchimpAttributeKeys() {
     return this.computeMailchimpAttributes().map(f => f.name);
   }
 
+  /**
+   * Get ready object of attributes and its values converted from Hull
+   * user to Mailchimp list member
+   *
+   * @returns {Object}
+   */
   getMailchimpAttrbutes(hullUser) {
     const mailchimpAttrbutes = _.reduce(this.computeMailchimpAttributes(), (fields, prop) => {
       if (_.get(hullUser, prop.hull)) {

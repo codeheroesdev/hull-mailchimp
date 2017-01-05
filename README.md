@@ -22,7 +22,7 @@ Configured via Hull Dashboard.
 
 ```sh
 docker-compose run npm install
-docker-compose run npm # that will 
+docker-compose run npm # that will run default development server with autoload enabled
 
 # run tests
 docker-compose run npm test

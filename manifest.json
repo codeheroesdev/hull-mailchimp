@@ -89,11 +89,6 @@
               "allowCreate": true,
               "loadOptions" : "/schema/user_fields"
             }
-          },
-          "overwrite" : {
-            "type" : "boolean",
-            "title" : "Hull overwrites Mailchimp",
-            "default" : false
           }
         },
         "required" : [

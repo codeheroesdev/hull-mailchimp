@@ -8,5 +8,7 @@ export default function schemaUserFields(req, res) {
           return { label: f.name, value: f.tag };
         })
       });
+    }, () => {
+      res.json({ options: [] });
     });
 }

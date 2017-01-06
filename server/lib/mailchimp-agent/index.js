@@ -75,7 +75,11 @@ export default class MailchimpAgent {
   getMergeFields() {
     return this.mailchimpClient
       .get(`/lists/${this.listId}/merge-fields`)
-      .then(({ body }) => body);
+      .then(({ body }) => body)
+      .catch(err => {
+        console.warn("Error getting merge fields", err.message);
+        return Promise.reject(this.mailchimpClient.handleError(err));
+      });
   }
 
 }

@@ -131,15 +131,15 @@ export default class UserMappingAgent {
    *
    * @returns {Object}
    */
-  getMailchimpAttrbutes(hullUser) {
-    const mailchimpAttrbutes = _.reduce(this.computeMailchimpAttributes(), (fields, prop) => {
+  getMailchimpAttributes(hullUser) {
+    const mailchimpAttributes = _.reduce(this.computeMailchimpAttributes(), (fields, prop) => {
       if (_.get(hullUser, prop.hull)) {
         _.set(fields, prop.name, _.get(hullUser, prop.hull));
       }
       return fields;
     }, {});
 
-    return mailchimpAttrbutes;
+    return mailchimpAttributes;
   }
 
 }

@@ -51,7 +51,7 @@ export default class SyncAgent {
 
       return {
         email_type: "html",
-        merge_fields: this.userMappingAgent.getMailchimpAttrbutes(user),
+        merge_fields: this.userMappingAgent.getMailchimpAttributes(user),
         interests: this.interestsMappingAgent.getInterestsForSegments(segment_ids),
         email_address: user.email,
         status_if_new: "subscribed"

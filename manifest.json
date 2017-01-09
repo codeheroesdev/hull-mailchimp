@@ -72,7 +72,15 @@
       "title" : "List of User attributes to push to Mailchimp",
       "type" : "array",
       "format" : "table",
-      "default": [],
+      "default": [{
+        "hull": "first_name",
+        "name": "FNAME",
+        "overwrite": true
+      }, {
+        "hull": "last_name",
+        "name": "LNAME",
+        "overwrite": true
+      }],
       "items" : {
         "type" : "object",
         "properties" : {

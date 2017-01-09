@@ -8,10 +8,13 @@
     "build:server": "babel server -d build",
     "start": "nf start",
     "start:dev": "NODE_ENV=development COMBINED=true babel-watch -L server/web",
-    "test": "NODE_ENV=test mocha --require babel-register -R spec ./tests",
+    "test": "npm run test:lint && npm run test:unit",
+    "test:unit": "NODE_ENV=test mocha --require babel-register -R spec ./tests",
     "test:lint": "eslint server",
     "clean": "rm -rf build",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "precommit": "npm test",
+    "prepush": "npm test"
   },
   "engines": {
     "node": "5.x",
@@ -84,6 +87,7 @@
     "eslint": "^2.9.0",
     "eslint-config-airbnb-base": "^3.0.1",
     "eslint-plugin-import": "^1.8.0",
+    "husky": "^0.12.0",
     "mocha": "^2.5.2",
     "proxyquire": "^1.7.10",
     "sinon": "^1.17.4"

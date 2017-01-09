@@ -113,7 +113,7 @@ export default class UserMappingAgent {
    *
    * @returns {Array} Array of objects having `name` and `hull` properties
    */
-  computeMailchimpAttributes() {
+  computeMergeFields() {
     return _.get(this.ship, "private_settings.sync_fields_to_mailchimp") || [];
   }
 
@@ -121,8 +121,8 @@ export default class UserMappingAgent {
    * Return only names of Mailchimp fields
    * @returns {Array}
    */
-  getMailchimpAttributeKeys() {
-    return this.computeMailchimpAttributes().map(f => f.name);
+  getMergeFieldsKeys() {
+    return this.computeMergeFields().map(f => f.name);
   }
 
   /**
@@ -131,8 +131,8 @@ export default class UserMappingAgent {
    *
    * @returns {Object}
    */
-  getMailchimpAttributes(hullUser) {
-    const mailchimpAttributes = _.reduce(this.computeMailchimpAttributes(), (fields, prop) => {
+  getMergeFields(hullUser) {
+    const mailchimpAttributes = _.reduce(this.computeMergeFields(), (fields, prop) => {
       if (_.get(hullUser, prop.hull)) {
         _.set(fields, prop.name, _.get(hullUser, prop.hull));
       }

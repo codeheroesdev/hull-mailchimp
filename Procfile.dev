@@ -1,2 +1,0 @@
-web: NODE_ENV=development babel-watch -L server/web
-worker: NODE_ENV=development babel-watch -L server/worker

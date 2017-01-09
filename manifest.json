@@ -84,7 +84,7 @@
           "name" : {
             "type" : "string",
             "format": "select",
-            "title" : "Mailchimp Attribute",
+            "title" : "Mailchimp Merge Field",
             "options" : {
               "allowCreate": true,
               "loadOptions" : "/schema/user_fields"

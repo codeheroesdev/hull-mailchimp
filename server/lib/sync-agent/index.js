@@ -12,6 +12,7 @@ export default class SyncAgent {
     this.ship = ship;
     this.mailchimpClient = mailchimpClient;
     this.hullAgent = hullAgent;
+    this.logger = this.hullAgent.hullClient.logger;
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
     this.instrumentationAgent = instrumentationAgent;
 
@@ -49,13 +50,16 @@ export default class SyncAgent {
     const members = users.map(user => {
       const segment_ids = _.difference((user.segment_ids || []), (user.remove_segment_ids || []));
 
-      return {
+      const userData = {
         email_type: "html",
         merge_fields: this.userMappingAgent.getMergeFields(user),
         interests: this.interestsMappingAgent.getInterestsForSegments(segment_ids),
         email_address: user.email,
         status_if_new: "subscribed"
       };
+      this.logger.debug("send.userData", userData);
+
+      return userData;
     });
 
     return this.mailchimpClient

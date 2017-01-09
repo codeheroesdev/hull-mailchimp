@@ -57,7 +57,7 @@ export default class SyncAgent {
         email_address: user.email,
         status_if_new: "subscribed"
       };
-      this.logger.debug("send.userData", userData);
+      this.logger.debug("outgoing.userData", userData);
 
       return userData;
     });

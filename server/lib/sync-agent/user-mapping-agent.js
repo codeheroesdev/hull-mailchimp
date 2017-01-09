@@ -103,6 +103,8 @@ export default class UserMappingAgent {
       traits.last_name = { operation: "setIfNull", value: mailchimp.lname };
     }
 
+    this.hullClient.logger.debug("incoming.userData", { ident, traits });
+
     return this.hullClient
       .as(ident)
       .traits(traits);
@@ -133,13 +135,11 @@ export default class UserMappingAgent {
    */
   getMergeFields(hullUser) {
     const mailchimpAttributes = _.reduce(this.computeMergeFields(), (fields, prop) => {
-      if (_.get(hullUser, prop.hull)) {
-        if (!_.get(prop, "overwrite")) {
-          _.set(fields, prop.name, _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull));
-        } else {
-          _.set(fields, prop.name, _.get(hullUser, prop.hull));
-        }
+      let value = _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull) || "";
+      if (_.get(prop, "overwrite") === true) {
+        value = _.get(hullUser, prop.hull) || "";
       }
+      _.set(fields, prop.name, value);
       return fields;
     }, {});
 

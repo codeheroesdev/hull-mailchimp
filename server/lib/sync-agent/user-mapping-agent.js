@@ -103,9 +103,47 @@ export default class UserMappingAgent {
       traits.last_name = { operation: "setIfNull", value: mailchimp.lname };
     }
 
+    this.hullClient.logger.debug("incoming.userData", { ident, traits });
+
     return this.hullClient
       .as(ident)
       .traits(traits);
+  }
+
+  /**
+   * Get list of attributes which should be synced to Mailchimp.
+   *
+   * @returns {Array} Array of objects having `name` and `hull` properties
+   */
+  computeMergeFields() {
+    return _.get(this.ship, "private_settings.sync_fields_to_mailchimp") || [];
+  }
+
+  /**
+   * Return only names of Mailchimp fields
+   * @returns {Array}
+   */
+  getMergeFieldsKeys() {
+    return this.computeMergeFields().map(f => f.name);
+  }
+
+  /**
+   * Get ready object of attributes and its values converted from Hull
+   * user to Mailchimp list member
+   *
+   * @returns {Object}
+   */
+  getMergeFields(hullUser) {
+    const mailchimpAttributes = _.reduce(this.computeMergeFields(), (fields, prop) => {
+      let value = _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull) || "";
+      if (_.get(prop, "overwrite") === true) {
+        value = _.get(hullUser, prop.hull) || "";
+      }
+      _.set(fields, prop.name, value);
+      return fields;
+    }, {});
+
+    return mailchimpAttributes;
   }
 
 }

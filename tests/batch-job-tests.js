@@ -18,7 +18,9 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
 
     return handleBatchExtract({
       shipApp: {
-        syncAgent: {},
+        syncAgent: {
+          filterUserData: (u) => u
+        },
         queueAgent: {},
         hullAgent
       },
@@ -49,13 +51,15 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       .once()
       .withExactArgs(
         "sendUsers",
-        { users: [{ id: "test", segment_ids: [1, 123, "abc"] }] }
+        { users: [{ id: "test", name: "test", segment_ids: [1, 123, "abc"] }] }
       )
       .returns(Promise.resolve());
 
     return handleBatchExtract({
       shipApp: {
-        syncAgent: {},
+        syncAgent: {
+          filterUserData: (u) => u
+        },
         queueAgent,
         hullAgent
       },

@@ -12,6 +12,7 @@ export default class SyncAgent {
     this.ship = ship;
     this.mailchimpClient = mailchimpClient;
     this.hullAgent = hullAgent;
+    this.logger = this.hullAgent.hullClient.logger;
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
     this.instrumentationAgent = instrumentationAgent;
 
@@ -49,20 +50,16 @@ export default class SyncAgent {
     const members = users.map(user => {
       const segment_ids = _.difference((user.segment_ids || []), (user.remove_segment_ids || []));
 
-      // TODO: investigate on custom merge fields strategies
-      // type check, empty fields, fields that doesn't exist?
-      // change the check if the users was already synced (update the traits)
-      // sync from hull -> mailchimp
-      return {
+      const userData = {
         email_type: "html",
-        merge_fields: {
-          FNAME: user.first_name || "",
-          LNAME: user.last_name || ""
-        },
+        merge_fields: this.userMappingAgent.getMergeFields(user),
         interests: this.interestsMappingAgent.getInterestsForSegments(segment_ids),
         email_address: user.email,
         status_if_new: "subscribed"
       };
+      this.logger.debug("outgoing.userData", userData);
+
+      return userData;
     });
 
     return this.mailchimpClient
@@ -107,5 +104,25 @@ export default class SyncAgent {
     });
 
     return Promise.map(promises, (p) => p(), { concurrency });
+  }
+
+  /**
+   * Trim down user traits for internal data flow.
+   * Returns user object with traits which will be used
+   * by ship in outgoing actions.
+   *
+   * @param {Object} user Hull user format
+   * @return {Object} trimmed down user
+   */
+  filterUserData(user) {
+    const attrsToSync = _.concat(
+      ["segment_ids", "first_name", "last_name", "id", "email"],
+      this.userMappingAgent.computeMergeFields().map(f => f.hull)
+    );
+
+    return _.pickBy(user, (v, k) => {
+      return _.includes(attrsToSync, k)
+        || k.match(/mailchimp/);
+    });
   }
 }

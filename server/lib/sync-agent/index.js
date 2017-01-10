@@ -105,4 +105,24 @@ export default class SyncAgent {
 
     return Promise.map(promises, (p) => p(), { concurrency });
   }
+
+  /**
+   * Trim down user traits for internal data flow.
+   * Returns user object with traits which will be used
+   * by ship in outgoing actions.
+   *
+   * @param {Object} user Hull user format
+   * @return {Object} trimmed down user
+   */
+  filterUserData(user) {
+    const attrsToSync = _.concat(
+      ["segment_ids", "first_name", "last_name", "id", "email"],
+      this.userMappingAgent.computeMergeFields().map(f => f.hull)
+    );
+
+    return _.pickBy(user, (v, k) => {
+      return _.includes(attrsToSync, k)
+        || k.match(/mailchimp/);
+    });
+  }
 }

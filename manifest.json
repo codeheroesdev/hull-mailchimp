@@ -94,7 +94,7 @@
             "format": "select",
             "title" : "Mailchimp Merge Field",
             "options" : {
-              "allowCreate": true,
+              "allowCreate": false,
               "loadOptions" : "/schema/user_fields"
             }
           },

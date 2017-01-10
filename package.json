@@ -13,7 +13,7 @@
     "test:lint": "eslint server",
     "clean": "rm -rf build",
     "postinstall": "npm run build",
-    "precommit": "npm test",
+    "precommit": "npm run test:lint",
     "prepush": "npm test"
   },
   "engines": {

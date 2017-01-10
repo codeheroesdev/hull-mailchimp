@@ -31,11 +31,7 @@ export default function handleBatchExtract(req) {
       return u;
     }));
 
-    users = users.map(user => {
-      return _.pickBy(user, (v, k) => {
-        return _.includes(["first_name", "last_name", "id", "email", "segment_ids"], k) || k.match(/mailchimp/);
-      });
-    });
+    users = users.map(user => syncAgent.filterUserData(user));
 
     return queueAgent.create("sendUsers", { users });
   });

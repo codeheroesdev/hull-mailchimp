@@ -1,9 +1,10 @@
 version: '2'
 services:
-    dev:
+    npm:
         image: node:5
         env_file: .env
-        entrypoint: npm run start:dev
+        entrypoint: npm
+        command: run start:dev
         working_dir: /app
         ports:
             - "8082:8082"

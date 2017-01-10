@@ -31,11 +31,7 @@ export default function userUpdateHandlerJob(req) {
       }
     }
     return user;
-  })).map(user => {
-    return _.pickBy(user, (v, k) => {
-      return _.includes(["segment_ids", "first_name", "last_name", "id", "email"], k) || k.match(/mailchimp/);
-    });
-  });
+  })).map(user => syncAgent.filterUserData(user));
 
   // eslint-disable-next-line no-unused-vars
   const usersToTrack = users.filter(u => {

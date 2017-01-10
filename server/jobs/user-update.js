@@ -32,8 +32,14 @@ export default function userUpdateHandlerJob(req) {
     }
     return user;
   })).map(user => {
+    const attrsToSync = _.concat(
+      ["segment_ids", "first_name", "last_name", "id", "email"],
+      syncAgent.userMappingAgent.computeMergeFields().map(f => f.hull)
+    );
+
     return _.pickBy(user, (v, k) => {
-      return _.includes(["segment_ids", "first_name", "last_name", "id", "email"], k) || k.match(/mailchimp/);
+      return _.includes(attrsToSync, k)
+        || k.match(/mailchimp/);
     });
   });
 

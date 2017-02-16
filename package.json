@@ -1,6 +1,6 @@
 {
   "name": "hull-mailchimp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Hull Mailchimp integration",
   "main": "index.js",
   "scripts": {

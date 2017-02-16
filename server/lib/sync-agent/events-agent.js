@@ -192,7 +192,7 @@ export default class EventsAgent {
   filterEvents(emailActivites, last_track_at = null) {
     if (last_track_at) {
       emailActivites = emailActivites.map(e => {
-        e.activity = e.activity.filter(a => {
+        e.activity = _.get(e, "activity", []).filter(a => {
           return moment(a.timestamp).utc().isAfter(last_track_at);
         });
         return e;

@@ -1,7 +1,9 @@
 # Changelog
 
+## 0.2.1
+- be less error-prone about missing properties coming from Mailchimp API
 
-## 0.2.0 (2017-01-10)
+## 0.2.0
 1. Added support for configurable attributes mapping
 2. Maintenance enhancements:
   - releases information supplied to errors

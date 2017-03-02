@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.2
+- fix error handling
+
 ## 0.2.1
 - be less error-prone about missing properties coming from Mailchimp API
 

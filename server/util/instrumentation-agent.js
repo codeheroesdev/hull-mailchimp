@@ -17,7 +17,10 @@ export default class InstrumentationAgent {
       this.raven = new raven.Client(process.env.SENTRY_URL, {
         release: require(`${process.cwd()}/package.json`).version // eslint-disable-line global-require
       });
-      this.raven.patchGlobal();
+      this.raven.patchGlobal((logged, err) => {
+        console.error(logged, err.stack || err);
+        process.exit(1);
+      });
     }
 
     if (process.env.LIBRATO_TOKEN && process.env.LIBRATO_USER) {

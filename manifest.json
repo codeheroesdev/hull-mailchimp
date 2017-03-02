@@ -5,7 +5,7 @@
   "tags": ["outgoing", "incoming", "batch", "oneColumn"],
   "picture": "picture.png",
   "admin" : "/auth/",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private_settings":[
     {
       "name": "synchronized_segments",

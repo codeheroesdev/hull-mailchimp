@@ -75,6 +75,10 @@ export default class MailchimpAgent {
   getMergeFields() {
     return this.mailchimpClient
       .get(`/lists/${this.listId}/merge-fields`)
+      .query({
+        count: 50,
+        fields: "merge_fields.name,merge_fields.tag"
+      })
       .then(({ body }) => body)
       .catch(err => {
         console.warn("Error getting merge fields", err.message);

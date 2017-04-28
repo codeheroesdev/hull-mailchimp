@@ -16,11 +16,13 @@ module.exports = function getClientMock() {
     put: () => {
       return Promise.resolve({});
     },
-    extract: {
-      handle: ({ body, batchSize, handler }) => {
-        return Promise.resolve([handler([
-          { id: "test", name: "test", segment_ids: [1, 123] }
-        ])]);
+    utils: {
+      extract: {
+        handle: ({ body, batchSize, handler }) => {
+          return Promise.resolve([handler(this, [
+            { id: "test", name: "test", segment_ids: [1, 123] }
+          ])]);
+        }
       }
     }
   };

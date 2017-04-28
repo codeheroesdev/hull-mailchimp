@@ -5,6 +5,6 @@
  * @param ctx
  * @param options
  */
-export default function handleMailchimpBatch(ctx, options) {
+export default function handleMailchimpBatch(ctx: any, options: any) {
   return ctx.shipApp.mailchimpAgent.batchAgent.handle(options);
 }

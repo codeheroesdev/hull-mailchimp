@@ -1,4 +1,3 @@
-/* @flow */
 import _ from "lodash";
 
 /**
@@ -8,7 +7,7 @@ export default function handleBatchExtract(context, payload) {
   const { body, batchSize, segmentId } = payload;
 
 
-  context.utils.extract.handle({ body, batchSize, handler: (ctx, messages) => {
+  return context.client.utils.extract.handle({ body, batchSize, handler: (ctx, messages) => {
     let users = messages.map(m => m.user);
     const { syncAgent } = ctx.shipApp;
 

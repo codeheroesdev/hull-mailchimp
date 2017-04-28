@@ -19,14 +19,28 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       .once()
       .returns(Promise.resolve());
 
-    return handleBatchExtract(
-      {
-        shipApp: {
-          syncAgent
-        },
-        client: ClientMock(),
-        enqueue: () => {}
+    const ctx = {
+      shipApp: {
+        syncAgent
       },
+      enqueue: () => { return Promise.resolve(); },
+      client: ClientMock()
+    };
+    const ctxMockedWithUtils = {
+      client: {
+        utils: {
+          extract: {
+            handle: ({ body, batchSize, handler }) => {
+              return Promise.resolve([handler(ctx, [
+                { id: "test", name: "test", segment_ids: [1, 123] }
+              ])]);
+            }
+          }
+        }
+      }
+    };
+    return handleBatchExtract(
+      ctxMockedWithUtils,
       {
         body: {
           url: "http://link-to-file.localhost/test.json",
@@ -48,9 +62,24 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
           userWhitelisted: function mocked() { return true; }
         },
       },
-      client: ClientMock(),
-      enqueue: () => { return Promise.resolve(); }
+      enqueue: () => { return Promise.resolve(); },
+      client: ClientMock()
     };
+
+    const ctxMockedWithUtils = {
+      client: {
+        utils: {
+          extract: {
+            handle: ({ body, batchSize, handler }) => {
+              return Promise.resolve([handler(ctx, [
+                { user: { id: "test", name: "test", segment_ids: [1, 123] } }
+              ])]);
+            }
+          }
+        }
+      }
+    };
+
     const contextEnqueueMock = sinon.mock(ctx);
     contextEnqueueMock.expects("enqueue")
       .once()
@@ -60,7 +89,7 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       )
       .returns(Promise.resolve());
 
-    return handleBatchExtract(ctx,
+    return handleBatchExtract(ctxMockedWithUtils,
       {
         body: {
           url: "http://link-to-file.localhost/test.json",

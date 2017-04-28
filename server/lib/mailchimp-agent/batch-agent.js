@@ -63,7 +63,7 @@ export default class MailchimpBatchAgent {
    * checks if the batch is finished
    * @api
    */
-  handle(options) { // todo batchId is never passed
+  handle(options) {
     const { batchId, attempt = 1, jobs = [], chunkSize, extractField, additionalData } = options;
     return this.mailchimpClient
       .get(`/batches/${batchId}`)

@@ -152,7 +152,7 @@ export default function oauth({
       return client.put(ship.id, {
         private_settings: { ...ship.private_settings, mailchimp_list_id: data.id, mailchimp_list_name: data.name }
       }).then(() => {
-        return res.redirect(`${req.baseUrl}${syncUrl}?hullToken=${req.hull.token}`); // todo req.hull.token exists ?
+        return res.redirect(`${req.baseUrl}${syncUrl}?hullToken=${req.hull.token}`);
       });
     }, mailchimpErrorHandler.bind(this, req, res, ship, client));
   }
@@ -163,7 +163,7 @@ export default function oauth({
     const viewData = {
       name,
       select_url: `https://${req.hostname}${req.baseUrl}${selectUrl}?hullToken=${req.hull.token}`,
-      form_action: `https://${req.hostname}/sync?hullToken=${req.hull.token}`, // todo same here
+      form_action: `https://${req.hostname}/sync?hullToken=${req.hull.token}`,
       mailchimp_list_name
     };
     return res.render("sync.html", viewData);

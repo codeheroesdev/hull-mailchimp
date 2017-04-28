@@ -7,7 +7,7 @@ import { Request, Response, Next } from "express";
  * @param  {Function} next
  */
 export default function tokenMiddleware(req: Request, res: Response, next: Next) {
-  if (req.query && req.query.hullToken) { // // todo ask hullToken, not token ?
+  if (req.query && req.query.hullToken) {
     req.hull = req.hull || {};
     req.hull.token = req.query.hullToken;
   }

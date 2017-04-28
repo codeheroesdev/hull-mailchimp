@@ -23,13 +23,10 @@ export default function sendUsersJob(ctx: any, payload: any) {
 
   return mailchimpAgent.ensureWebhookSubscription(ctx)
     .then(() => {
-      return ctx.segments;
-    })
-    .then(segments => {
-      return syncAgent.segmentsMappingAgent.syncSegments(segments)
+      return syncAgent.segmentsMappingAgent.syncSegments(ctx.segments)
         .then(() => syncAgent.segmentsMappingAgent.updateMapping())
         .then(() => syncAgent.interestsMappingAgent.ensureCategory())
-        .then(() => syncAgent.interestsMappingAgent.syncInterests(segments));
+        .then(() => syncAgent.interestsMappingAgent.syncInterests(ctx.segments));
     })
     .then(() => {
       return syncAgent.addToList(usersToAddToList);

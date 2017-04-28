@@ -135,7 +135,7 @@ export default class UserMappingAgent {
    */
   getMergeFields(hullUser) {
     return _.reduce(this.computeMergeFields(), (fields, prop) => {
-      let value = _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull) || ""; // todo this hull field is okey ?
+      let value = _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull) || "";
       if (_.get(prop, "overwrite") === true) {
         value = _.get(hullUser, prop.hull) || "";
       }

@@ -158,7 +158,7 @@ export default class EventsAgent {
   trackEvents(emails) {
     this.client.logger.info("trackEvents", emails.length);
     const emailTracks = emails.map(email => {
-      const user = this.client.as({
+      const user = this.client.asUser({
         email: email.email_address
       });
       return Promise.all(email.activity.map(a => {

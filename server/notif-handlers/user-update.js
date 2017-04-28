@@ -4,8 +4,8 @@ import _ from "lodash";
 /**
  * Handles events of user
  */
-export default function userUpdateHandler(ctx: any, payload: any) {
-  const users = payload.messages.reduce((accumulator, message) => {
+export default function userUpdateHandler(ctx: any, messages: any) {
+  const filteredMessages = messages.reduce((accumulator, message) => {
     const { changes = {} } = message;
     if (!_.isEmpty(_.get(changes, "user['traits_mailchimp/unique_email_id'][1]"))
       || !_.isEmpty(_.get(changes, "user['traits_mailchimp/import_error'][1]"))
@@ -16,5 +16,5 @@ export default function userUpdateHandler(ctx: any, payload: any) {
     return accumulator.concat(message);
   });
 
-  return ctx.enqueue("userUpdate", { users });
+  return ctx.enqueue("userUpdate", { messages: filteredMessages });
 }

@@ -3,6 +3,7 @@ import { Request, Response, Next, Result } from "express";
 import _ from "lodash";
 
 /**
+ * @param result
  * @param  {Object}   req
  * @param  {Object}   res
  * @param  {Function} next

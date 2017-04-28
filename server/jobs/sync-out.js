@@ -12,11 +12,10 @@ export default function syncOutJob(ctx: any) {
 
   return syncAgent.segmentsMappingAgent.syncSegments()
     .then(() => syncAgent.interestsMappingAgent.syncInterests())
-    .then(() => Promise.resolve(ctx.segments))
-    .then(segments => {
+    .then(() => {
       return syncAgent.interestsMappingAgent.ensureCategory()
-        .then(() => syncAgent.interestsMappingAgent.syncInterests(segments))
-        .then(() => syncAgent.segmentsMappingAgent.syncSegments(segments))
+        .then(() => syncAgent.interestsMappingAgent.syncInterests(ctx.segments))
+        .then(() => syncAgent.segmentsMappingAgent.syncSegments(ctx.segments))
         .then(() => syncAgent.segmentsMappingAgent.updateMapping());
     })
     .then(() => {

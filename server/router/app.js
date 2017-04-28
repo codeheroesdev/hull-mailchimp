@@ -11,7 +11,7 @@ import AppMiddleware from "../lib/middlewares/app";
 
 export default function AppRouter(deps: any) {
   const router = new Router();
-  const { actions, notifHandlers, jobs } = deps;
+  const { actions, notifHandlers } = deps;
 
   // FIXME: since we have two routers on the same mountpoint: "/"
   // all middleware applied here also is applied to the static router,
@@ -21,8 +21,8 @@ export default function AppRouter(deps: any) {
   const middlewareSet = [tokenMiddleware, requireConfiguration];
 
   router.use(AppMiddleware());
-  router.use("/batch", ...middlewareSet, actions.handleBatchExtract, batchHandler(jobs.handleBatchExtract, {}));
-  router.use("/notify", notifHandler({
+  router.post("/batch", requireConfiguration, ...middlewareSet, actions.handleBatchExtract, responseMiddleware);
+  router.use("/notify", requireConfiguration, notifHandler({
     userHandlerOptions: {
       groupTraits: false
     },
@@ -34,12 +34,12 @@ export default function AppRouter(deps: any) {
     }
   }));
 
-  router.post("/sync", ...middlewareSet, actions.sync);
-  router.post("/track", ...middlewareSet, actions.track, responseMiddleware);
+  router.post("/sync", requireConfiguration, ...middlewareSet, actions.sync, responseMiddleware);
+  router.post("/track", requireConfiguration, ...middlewareSet, actions.track, responseMiddleware);
 
-  router.use("/mailchimp", requireConfiguration, bodyParser.urlencoded({ extended: true }), actions.webhook);
+  router.use("/mailchimp", requireConfiguration, bodyParser.urlencoded({ extended: true }), actions.webhook, responseMiddleware);
 
-  router.get("/schema/user_fields", cors(), ...middlewareSet, actions.schemaUserFields);
+  router.get("/schema/user_fields", requireConfiguration, cors(), ...middlewareSet, actions.schemaUserFields, responseMiddleware);
 
   return router;
 }

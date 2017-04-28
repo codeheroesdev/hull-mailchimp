@@ -4,15 +4,19 @@ import _ from "lodash";
 /**
  * Handles extract sent from Hull with optional setting selected segment_id
  */
-export default function handleBatchExtract(ctx, payload) {
-  const { syncAgent } = ctx.shipApp;
+export default function handleBatchExtract(context, payload) {
+  const { body, batchSize, segmentId } = payload;
 
-  ctx.client.logger.info("batch.handleBatchExtract", payload.body);
 
-  const handler = (users) => {
-    if (payload.segmentId) {
+  context.utils.extract.handle({ body, batchSize, handler: (ctx, messages) => {
+    let users = messages.map(m => m.user);
+    const { syncAgent } = ctx.shipApp;
+
+    ctx.client.logger.info("batch.handleBatchExtract", body);
+
+    if (segmentId) {
       users = users.map(u => {
-        u.segment_ids = _.uniq(_.concat(u.segment_ids || [], [payload.segmentId]));
+        u.segment_ids = _.uniq(_.concat(u.segment_ids || [], [segmentId]));
         return u;
       });
     }
@@ -34,7 +38,5 @@ export default function handleBatchExtract(ctx, payload) {
     users = users.map(user => syncAgent.filterUserData(user));
 
     return ctx.enqueue("sendUsers", { users });
-  };
-
-  return ctx.client.extract.handle({ body: payload.body, batchSize: payload.chunkSize, handler });
+  } });
 }

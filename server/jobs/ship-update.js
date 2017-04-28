@@ -9,12 +9,9 @@ export default function shipUpdateHandlerJob(ctx: any) {
     return Promise.resolve();
   }
 
-  mailchimpAgent.ensureWebhookSubscription(ctx);
-  return Promise.resolve(ctx.segments)
-    .then(segments => {
-      return syncAgent.segmentsMappingAgent.syncSegments(segments)
-        .then(() => syncAgent.segmentsMappingAgent.updateMapping())
-        .then(() => syncAgent.interestsMappingAgent.ensureCategory())
-        .then(() => syncAgent.interestsMappingAgent.syncInterests(segments));
-    });
+  return mailchimpAgent.ensureWebhookSubscription(ctx)
+    .then(() => syncAgent.segmentsMappingAgent.syncSegments(ctx.segments)
+      .then(() => syncAgent.segmentsMappingAgent.updateMapping())
+      .then(() => syncAgent.interestsMappingAgent.ensureCategory())
+      .then(() => syncAgent.interestsMappingAgent.syncInterests(ctx.segments)));
 }

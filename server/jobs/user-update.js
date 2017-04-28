@@ -13,7 +13,6 @@ export default function userUpdateHandlerJob(ctx: any, payload: any) {
   }
 
   ctx.client.logger.info("userUpdateHandlerJob", payload.messages.length);
-  // const users = _.filter(_.map(payload.messages, (message) => {
   const users = payload.messages.reduce((accumulator, message) => {
     const { user, changes = {}, segments = [] } = message;
     const { left = [] } = changes.segments || {};

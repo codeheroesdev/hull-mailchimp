@@ -25,6 +25,7 @@ const {
 if (LOG_LEVEL) {
   Hull.logger.transports.console.level = LOG_LEVEL;
 }
+Hull.logger.transports.console.stringify = true;
 
 
 export const shipConfig = {
@@ -41,9 +42,7 @@ const cache = new Cache({
 
 const queue = new Queue("kue", {
   prefix: KUE_PREFIX,
-  redis: {
-    host: REDIS_URL
-  }
+  redis: REDIS_URL
 });
 
 

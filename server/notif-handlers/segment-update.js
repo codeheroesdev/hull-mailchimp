@@ -4,5 +4,5 @@
  * and trigger an extract for that segment to update users.
  */
 export default function segmentUpdateHandler(ctx: any, payload: any) {
-  return ctx.enqueue("segmentUpdate", { message: payload.message });
+  return ctx.enqueue("segmentUpdate", payload);
 }

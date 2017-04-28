@@ -2,8 +2,9 @@
 /**
  * Parses the extract results and queues chunks for export operations
  * @return {Promise}
- * @param req
+ * @param ctx
+ * @param options
  */
-export default function handleMailchimpBatch(req: any) {
-  return req.shipApp.mailchimpAgent.batchAgent.handle(req.payload);
+export default function handleMailchimpBatch(ctx, options) {
+  return ctx.shipApp.mailchimpAgent.batchAgent.handle(options);
 }

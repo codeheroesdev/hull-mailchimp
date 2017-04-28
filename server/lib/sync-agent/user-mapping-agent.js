@@ -25,9 +25,9 @@ const MailchimpFields = [
  */
 export default class UserMappingAgent {
 
-  constructor(ship, hullClient) {
+  constructor(ship, client) {
     this.ship = ship;
-    this.hullClient = hullClient;
+    this.client = client;
     this.mailchimpFields = MailchimpFields;
   }
 
@@ -103,9 +103,9 @@ export default class UserMappingAgent {
       traits.last_name = { operation: "setIfNull", value: mailchimp.lname };
     }
 
-    this.hullClient.logger.debug("incoming.userData", { ident, traits });
+    this.client.logger.debug("incoming.userData", { ident, traits });
 
-    return this.hullClient
+    return this.client
       .as(ident)
       .traits(traits);
   }
@@ -134,16 +134,14 @@ export default class UserMappingAgent {
    * @returns {Object}
    */
   getMergeFields(hullUser) {
-    const mailchimpAttributes = _.reduce(this.computeMergeFields(), (fields, prop) => {
-      let value = _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull) || "";
+    return _.reduce(this.computeMergeFields(), (fields, prop) => {
+      let value = _.get(hullUser, `traits_mailchimp/${prop.name.toLowerCase()}`) || _.get(hullUser, prop.hull) || ""; // todo this hull field is okey ?
       if (_.get(prop, "overwrite") === true) {
         value = _.get(hullUser, prop.hull) || "";
       }
       _.set(fields, prop.name, value);
       return fields;
     }, {});
-
-    return mailchimpAttributes;
   }
 
 }

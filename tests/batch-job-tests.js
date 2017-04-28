@@ -1,53 +1,58 @@
 /* global describe, it */
-import assert from "assert";
 import sinon from "sinon";
 import Promise from "bluebird";
-import moment from "moment";
 
-import { hullAgent, queueAgent, hullClient } from "./support";
+import ClientMock from "./mocks/client-mock";
 
 import handleBatchExtract from "../server/jobs/handle-batch-extract";
 
 
 describe("handleBatchExtractJob", function EventsAgentTest() {
   it("should run extract data from json file", () => {
-    const extractAgentMock = sinon.mock(hullAgent.extractAgent);
-    extractAgentMock.expects("handleExtract")
+    const syncAgent = {
+      userAdded: () => { return true; },
+      filterUserData: (u) => u,
+      userWhitelisted: function mocked() { return true; }
+    };
+    const syncAgentMock = sinon.mock(syncAgent);
+    syncAgentMock.expects("userWhitelisted")
       .once()
       .returns(Promise.resolve());
 
-    return handleBatchExtract({
-      shipApp: {
-        syncAgent: {
-          filterUserData: (u) => u
+    return handleBatchExtract(
+      {
+        shipApp: {
+          syncAgent
         },
-        queueAgent: {},
-        hullAgent
+        client: ClientMock(),
+        enqueue: () => {}
       },
-      hull: {
-        client: hullClient
-      },
-      payload: {
+      {
         body: {
           url: "http://link-to-file.localhost/test.json",
           format: "json"
         }
       }
-    })
-    .then((res) => {
-      extractAgentMock.verify();
-    });
+    )
+      .then(() => {
+        syncAgentMock.verify();
+      });
   });
 
   it("should parse user list adding segment id from payload", () => {
-    hullAgent.userWhitelisted = () => true;
-    hullAgent.extractAgent.handleExtract = function(body, chunkSize, cb) {
-      return new Promise.resolve([cb([
-        {id: "test", name: "test", segment_ids: [1, 123]}
-      ])]);
+    const ctx = {
+      shipApp: {
+        syncAgent: {
+          filterUserData: (u) => u,
+          userAdded: () => { return false; },
+          userWhitelisted: function mocked() { return true; }
+        },
+      },
+      client: ClientMock(),
+      enqueue: () => { return Promise.resolve(); }
     };
-    const queueAgentMock = sinon.mock(queueAgent);
-    queueAgentMock.expects("create")
+    const contextEnqueueMock = sinon.mock(ctx);
+    contextEnqueueMock.expects("enqueue")
       .once()
       .withExactArgs(
         "sendUsers",
@@ -55,27 +60,16 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       )
       .returns(Promise.resolve());
 
-    return handleBatchExtract({
-      shipApp: {
-        syncAgent: {
-          filterUserData: (u) => u
-        },
-        queueAgent,
-        hullAgent
-      },
-      hull: {
-        client: hullClient
-      },
-      payload: {
+    return handleBatchExtract(ctx,
+      {
         body: {
           url: "http://link-to-file.localhost/test.json",
           format: "json"
         },
         segmentId: "abc"
-      }
-    })
-    .then((res) => {
-      queueAgentMock.verify();
-    });
+      })
+      .then(() => {
+        contextEnqueueMock.verify();
+      });
   });
 });

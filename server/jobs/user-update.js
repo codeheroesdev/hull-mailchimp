@@ -1,18 +1,20 @@
+/* @flow */
 import _ from "lodash";
 
 /**
  * Handles events of user
  */
-export default function userUpdateHandlerJob(req) {
-  const { hullAgent, queueAgent, syncAgent } = req.shipApp;
+export default function userUpdateHandlerJob(ctx: any, payload: any) {
+  const { queueAgent, syncAgent } = ctx.shipApp;
 
   if (!syncAgent.isConfigured()) {
-    req.hull.client.logger.error("ship not configured");
+    ctx.client.logger.error("ship not configured");
     return Promise.resolve();
   }
 
-  req.hull.client.logger.info("userUpdateHandlerJob", req.payload.messages.length);
-  const users = _.filter(_.map(req.payload.messages, (message) => {
+  ctx.client.logger.info("userUpdateHandlerJob", payload.messages.length);
+  // const users = _.filter(_.map(payload.messages, (message) => {
+  const users = payload.messages.reduce((accumulator, message) => {
     const { user, changes = {}, segments = [] } = message;
     const { left = [] } = changes.segments || {};
     user.segment_ids = _.uniq(_.concat(user.segment_ids || [], segments.map(s => s.id)));
@@ -20,22 +22,23 @@ export default function userUpdateHandlerJob(req) {
     // if the use is outside the whitelist and was already saved to mailchimp
     // remove it from all segments, if he is outside the whitelist
     // and wasn't saved remove it from the batch
-    if (hullAgent.userWhitelisted(user)) {
+    if (ctx.shipApp.syncAgent.userWhitelisted(user)) {
       user.remove_segment_ids = left.map(s => s.id);
     } else {
       if (syncAgent.userAdded(user)) {
         user.segment_ids = [];
         user.remove_segment_ids = syncAgent.segmentsMappingAgent.getSegmentIds();
       } else {
-        return false;
+        return accumulator;
       }
     }
-    return user;
-  })).map(user => syncAgent.filterUserData(user));
+    return accumulator.concat(user);
+  }, []).map(user => syncAgent.filterUserData(user));
+
 
   // eslint-disable-next-line no-unused-vars
   const usersToTrack = users.filter(u => {
-    return syncAgent.userAdded(u) && hullAgent.userWhitelisted(u);
+    return syncAgent.userAdded(u) && ctx.shipApp.syncAgent.userWhitelisted(u);
   });
 
   const promises = [];

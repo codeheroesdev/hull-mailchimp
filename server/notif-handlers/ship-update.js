@@ -1,3 +1,4 @@
-export default function shipUpdateHandler(payload, { req }) {
-  return req.shipApp.queueAgent.create("shipUpdate");
+/* @flow */
+export default function shipUpdateHandler(ctx: any) {
+  return ctx.enqueue("shipUpdate");
 }

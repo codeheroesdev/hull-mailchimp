@@ -1,21 +1,13 @@
-import WorkerApp from "./util/app/worker";
-import ExitHandler from "./util/handler/exit";
-import tokenMiddleware from "./util/middleware/token";
+/* @flow */
+import AppMiddleware from "./lib/middlewares/app";
 
-import * as bootstrap from "./bootstrap";
+module.exports = function worker(options: any = {}) {
+  const { connector, jobs } = options;
 
+  connector.worker({
+    jobs
+  })
+    .use(AppMiddleware());
 
-const { hullMiddleware, queueAdapter, appMiddleware } = bootstrap;
-
-const workerApp = new WorkerApp(bootstrap);
-
-workerApp
-  .use(tokenMiddleware)
-  .use(hullMiddleware)
-  .use(appMiddleware);
-
-workerApp.process();
-
-bootstrap.Hull.logger.info("workerApp.process");
-
-ExitHandler(queueAdapter.exit.bind(queueAdapter));
+  connector.startWorker();
+};

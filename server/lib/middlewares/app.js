@@ -1,36 +1,27 @@
+/* @flow */
+import { Request, Response, Next } from "express";
 import MailchimpClient from "../mailchimp-client";
 import MailchimpAgent from "../mailchimp-agent";
-import HullAgent from "../../util/hull-agent";
-import QueueAgent from "../../util/queue/queue-agent";
-// import EventsAgent from "../events-agent";
 
 import SyncAgent from "../sync-agent";
 
-export default function ({ queueAdapter, shipCache, instrumentationAgent }) {
-  return function middleware(req, res, next) {
-    req.shipApp = req.shipApp || {};
+export default function () {
+  return function middleware(req: Request, res: Response, next: Next) {
+    req.hull.shipApp = req.hull.shipApp || {};
 
     if (!req.hull.ship) {
       return next();
     }
-    shipCache.setClient(req.hull.client);
-    instrumentationAgent.setShip(req.hull.ship);
 
     const mailchimpClient = new MailchimpClient(req.hull.ship);
 
-    const queueAgent = new QueueAgent(queueAdapter, req);
-    const mailchimpAgent = new MailchimpAgent(mailchimpClient, req.hull.ship, req.hull.client, queueAgent, instrumentationAgent);
-    const hullAgent = new HullAgent(req.hull.ship, req.hull.client, shipCache, req);
+    const mailchimpAgent = new MailchimpAgent(mailchimpClient, req.hull);
+    const syncAgent = new SyncAgent(mailchimpClient, req.hull);
 
-    const syncAgent = new SyncAgent(mailchimpClient, hullAgent, req.hull.ship, instrumentationAgent);
-
-    req.shipApp = {
+    req.hull.shipApp = {
       mailchimpClient,
       mailchimpAgent,
-      hullAgent,
-      queueAgent,
-      syncAgent,
-      instrumentationAgent
+      syncAgent
     };
 
     return next();

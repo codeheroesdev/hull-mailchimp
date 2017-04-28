@@ -3,16 +3,23 @@ import assert from "assert";
 import sinon from "sinon";
 import Promise from "bluebird";
 import moment from "moment";
-import { hullAgent, mailchimpClient, instrumentationAgent, hullClient } from "./support";
+import { mailchimpClient } from "./support";
+import ClientMock from "./mocks/client-mock";
 
 import EventsAgent from "../server/lib/sync-agent/events-agent";
-
 
 
 describe("EventsAgent", function EventsAgentTest() {
   const private_settings = {
     mailchimp_list_id: "test"
   };
+
+  const metric = {
+    increment: () => {},
+    value: () => {}
+  };
+
+  const client = ClientMock();
 
   describe("getTrackableCampaigns", () => {
     it("should return interesting campaigns", () => {
@@ -46,7 +53,7 @@ describe("EventsAgent", function EventsAgentTest() {
           }
         }));
 
-      const agent = new EventsAgent(mailchimpClient, hullClient, { private_settings }, instrumentationAgent);
+      const agent = new EventsAgent(mailchimpClient, client, { private_settings }, metric);
 
       return agent.getTrackableCampaigns()
         .then(res => {
@@ -61,9 +68,7 @@ describe("EventsAgent", function EventsAgentTest() {
   });
 
   describe("getMemberActivities", () => {
-
     it("should return all activites for specified user", () => {
-
       const mailchimpClientMock = sinon.mock(mailchimpClient);
       mailchimpClientMock.expects("get")
         .once()
@@ -76,30 +81,30 @@ describe("EventsAgent", function EventsAgentTest() {
         })
         .returns(Promise.resolve({
           body: {
-            activity: [ { action: 'bounce',
-              timestamp: '2016-07-12T11:06:04+00:00',
-              type: 'hard',
-              campaign_id: 'fcd1ff3598' },
-            { action: 'bounce',
-              timestamp: '2016-07-12T11:02:19+00:00',
-              type: 'hard',
-              campaign_id: '2c4a24e9df',
-              title: 'Hull bounce test' },
-            { action: 'sent',
-              timestamp: '2016-07-12T11:02:17+00:00',
-              type: 'regular',
-              campaign_id: 'fcd1ff3598' },
-            { action: 'sent',
-              timestamp: '2016-07-12T10:58:09+00:00',
-              type: 'regular',
-              campaign_id: '2c4a24e9df',
-              title: 'Hull bounce test' } ],
-            email_id: 'ffad177299613c50982e95a32c60adc7',
-            list_id: '319f54214b',
+            activity: [{ action: "bounce",
+              timestamp: "2016-07-12T11:06:04+00:00",
+              type: "hard",
+              campaign_id: "fcd1ff3598" },
+            { action: "bounce",
+              timestamp: "2016-07-12T11:02:19+00:00",
+              type: "hard",
+              campaign_id: "2c4a24e9df",
+              title: "Hull bounce test" },
+            { action: "sent",
+              timestamp: "2016-07-12T11:02:17+00:00",
+              type: "regular",
+              campaign_id: "fcd1ff3598" },
+            { action: "sent",
+              timestamp: "2016-07-12T10:58:09+00:00",
+              type: "regular",
+              campaign_id: "2c4a24e9df",
+              title: "Hull bounce test" }],
+            email_id: "ffad177299613c50982e95a32c60adc7",
+            list_id: "319f54214b",
           }
         }));
 
-      const agent = new EventsAgent(mailchimpClient, hullClient, { private_settings }, instrumentationAgent);
+      const agent = new EventsAgent(mailchimpClient, client, { private_settings }, metric);
 
       return agent.getMemberActivities([{
         id: "test",
@@ -108,27 +113,27 @@ describe("EventsAgent", function EventsAgentTest() {
       .then(res => {
         mailchimpClientMock.verify();
         assert.deepEqual(res, [{
-          activity: [ { action: 'bounce',
-            timestamp: '2016-07-12T11:06:04+00:00',
-            type: 'hard',
-            campaign_id: 'fcd1ff3598' },
-          { action: 'bounce',
-            timestamp: '2016-07-12T11:02:19+00:00',
-            type: 'hard',
-            campaign_id: '2c4a24e9df',
-            title: 'Hull bounce test' },
-          { action: 'sent',
-            timestamp: '2016-07-12T11:02:17+00:00',
-            type: 'regular',
-            campaign_id: 'fcd1ff3598' },
-          { action: 'sent',
-            timestamp: '2016-07-12T10:58:09+00:00',
-            type: 'regular',
-            campaign_id: '2c4a24e9df',
-            title: 'Hull bounce test' } ],
+          activity: [{ action: "bounce",
+            timestamp: "2016-07-12T11:06:04+00:00",
+            type: "hard",
+            campaign_id: "fcd1ff3598" },
+          { action: "bounce",
+            timestamp: "2016-07-12T11:02:19+00:00",
+            type: "hard",
+            campaign_id: "2c4a24e9df",
+            title: "Hull bounce test" },
+          { action: "sent",
+            timestamp: "2016-07-12T11:02:17+00:00",
+            type: "regular",
+            campaign_id: "fcd1ff3598" },
+          { action: "sent",
+            timestamp: "2016-07-12T10:58:09+00:00",
+            type: "regular",
+            campaign_id: "2c4a24e9df",
+            title: "Hull bounce test" }],
           email_address: "bouncer@michaloo.net",
-          email_id: 'ffad177299613c50982e95a32c60adc7',
-          list_id: '319f54214b'
+          email_id: "ffad177299613c50982e95a32c60adc7",
+          list_id: "319f54214b"
         }]);
       });
     });

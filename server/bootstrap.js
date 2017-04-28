@@ -1,42 +1,61 @@
+/* @flow */
 /**
  * Main project dependencies
  */
-import CacheManager from "cache-manager";
-import kue from "kue";
 import Hull from "hull";
 
-import AppMiddleware from "./lib/middlewares/app";
-import KueAdapter from "./util/queue/adapter/kue";
-import InstrumentationAgent from "./util/instrumentation-agent";
+import { Queue, Cache } from "hull/lib/utils";
 
-if (process.env.LOG_LEVEL) {
-  Hull.logger.transports.console.level = process.env.LOG_LEVEL;
+import * as Jobs from "./jobs";
+import * as Actions from "./actions";
+import * as NotifHandlers from "./notif-handlers";
+
+const {
+  PORT = 8082,
+  LOG_LEVEL,
+  SECRET = "1234",
+  MAILCHIMP_CLIENT_ID,
+  MAILCHIMP_CLIENT_SECRET,
+  KUE_PREFIX = "hull-mailchimp",
+  REDIS_URL,
+  SHIP_CACHE_MAX,
+  SHIP_CACHE_TTL
+} = process.env;
+
+if (LOG_LEVEL) {
+  Hull.logger.transports.console.level = LOG_LEVEL;
 }
 
-export * as jobs from "./jobs";
-export * as actions from "./actions";
-export * as notifHandlers from "./notif-handlers";
 
 export const shipConfig = {
-  hostSecret: process.env.SECRET || "1234",
-  clientID: process.env.MAILCHIMP_CLIENT_ID,
-  clientSecret: process.env.MAILCHIMP_CLIENT_SECRET
+  hostSecret: SECRET,
+  clientID: MAILCHIMP_CLIENT_ID,
+  clientSecret: MAILCHIMP_CLIENT_SECRET
 };
 
-export const instrumentationAgent = new InstrumentationAgent("mailchimp");
-
-export const queueAdapter = new KueAdapter(kue.createQueue({
-  prefix: process.env.KUE_PREFIX || "hull-mailchimp",
-  redis: process.env.REDIS_URL
-}));
-
-export Hull from "hull";
-export const cacheManager = CacheManager.caching({
+const cache = new Cache({
   store: "memory",
-  max: process.env.SHIP_CACHE_MAX || 100,
-  ttl: process.env.SHIP_CACHE_TTL || 60
+  max: SHIP_CACHE_MAX,
+  ttl: SHIP_CACHE_TTL
 });
 
-export const shipCache = new Hull.ShipCache(cacheManager, process.env.SHIP_CACHE_PREFIX || "hull-mailchimp-cache");
-export const hullMiddleware = new Hull.Middleware({ hostSecret: shipConfig.hostSecret, shipCache });
-export const appMiddleware = new AppMiddleware({ queueAdapter, shipCache, instrumentationAgent });
+const queue = new Queue("kue", {
+  prefix: KUE_PREFIX,
+  redis: {
+    host: REDIS_URL
+  }
+});
+
+
+const connector = new Hull.Connector({ hostSecret: SECRET, port: PORT, cache, queue });
+
+export default {
+  hullMiddleware: connector.clientMiddleware(),
+  connector,
+  shipConfig,
+  cache,
+  queue,
+  Jobs,
+  Actions,
+  NotifHandlers
+};

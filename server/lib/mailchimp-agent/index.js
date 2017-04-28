@@ -10,14 +10,13 @@ import MailchimpBatchAgent from "./batch-agent";
  */
 export default class MailchimpAgent {
 
-  constructor(mailchimpClient, ship, hullClient, queueAgent, instrumentationAgent) {
+  constructor(mailchimpClient, ctx) {
     this.mailchimpClient = mailchimpClient;
-    this.hullClient = hullClient;
-    this.ship = ship;
-    this.listId = _.get(ship, "private_settings.mailchimp_list_id");
-    this.instrumentationAgent = instrumentationAgent;
+    this.client = ctx.client;
+    this.ship = ctx.ship;
+    this.listId = _.get(ctx.ship, "private_settings.mailchimp_list_id");
 
-    this.batchAgent = new MailchimpBatchAgent(hullClient, mailchimpClient, queueAgent, instrumentationAgent);
+    this.batchAgent = new MailchimpBatchAgent(ctx, mailchimpClient);
   }
 
   getEmailHash(email) {
@@ -26,8 +25,8 @@ export default class MailchimpAgent {
       .digest("hex");
   }
 
-  getWebhook({ hostname, hull }) {
-    const ship = _.get(hull.client.configuration(), "id");
+  getWebhook({ hostname, client }) {
+    const ship = _.get(client.configuration(), "id");
     return this.mailchimpClient
       .get(`/lists/${this.listId}/webhooks`)
       .then(({ body = {} }) => {
@@ -38,9 +37,9 @@ export default class MailchimpAgent {
       });
   }
 
-  createWebhook(req) {
-    const { hostname } = req;
-    const { organization, id, secret } = req.hull.client.configuration();
+  createWebhook(ctx) {
+    const { hostname } = ctx;
+    const { organization, id, secret } = ctx.client.configuration();
     const search = {
       organization,
       secret,

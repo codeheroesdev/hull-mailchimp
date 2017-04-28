@@ -3,7 +3,7 @@ import { Router } from "express";
 import bodyParser from "body-parser";
 import oauth2Factory from "simple-oauth2";
 import rp from "request-promise";
-import TokenMiddleware from "../util/middleware/token";
+import TokenMiddleware from "./middlewares/token";
 
 export default function oauth({
   name, clientID, clientSecret,
@@ -26,10 +26,10 @@ export default function oauth({
    * for the ship mailchimp application and we need to ask for the permission
    * once again
    */
-  function mailchimpErrorHandler(req, res, ship, hull, err) {
+  function mailchimpErrorHandler(req, res, ship, client, err) {
     if (err.statusCode === 401) {
-      hull.logger.info("Mailchimp /lists query returned 401 - ApiKey is invalid");
-      hull.put(ship.id, {
+      client.logger.info("Mailchimp /lists query returned 401 - ApiKey is invalid");
+      client.put(ship.id, {
         private_settings: { ...ship.private_settings, api_key: null, mailchimp_list_id: null }
       }).then(() => {
         return res.redirect(`${req.baseUrl}${homeUrl}?hullToken=${req.hull.token}`);
@@ -60,7 +60,7 @@ export default function oauth({
   }
 
   function renderRedirect(req, res) {
-    const { ship = {}, client: hull } = req.hull;
+    const { ship = {}, client } = req.hull;
 
     const code = req.query.code;
     const redirect_uri = `https://${req.hostname}${req.baseUrl}${callbackUrl}?hullToken=${req.hull.token}`;
@@ -88,7 +88,7 @@ export default function oauth({
             }
           })
           .then(
-            (b = {}) => hull.put(ship.id, {
+            (b = {}) => client.put(ship.id, {
               private_settings: { ...ship.private_settings, domain: b.dc, api_key: message.access_token, api_endpoint: b.api_endpoint }
             }),
             err => res.send(err)
@@ -113,7 +113,7 @@ export default function oauth({
   }
 
   function renderSelect(req, res) {
-    const { ship = {}, client: hull } = req.hull;
+    const { ship = {}, client } = req.hull;
     const { api_key: apiKey, mailchimp_list_id, api_endpoint } = ship.private_settings || {};
     const viewData = {
       name,
@@ -134,11 +134,11 @@ export default function oauth({
       );
 
       return res.render("admin.html", viewData);
-    }, mailchimpErrorHandler.bind(this, res, res, ship, hull));
+    }, mailchimpErrorHandler.bind(this, req, res, ship, client));
   }
 
   function handleSelect(req, res) {
-    const { ship = {}, client: hull } = req.hull;
+    const { ship = {}, client } = req.hull;
     const { api_key: apiKey, api_endpoint } = ship.private_settings || {};
     const list_id = req.body.mailchimp_list_id;
     rp({
@@ -149,12 +149,12 @@ export default function oauth({
       headers: { Authorization: `OAuth ${apiKey}`, },
       json: true
     }).then((data) => {
-      return hull.put(ship.id, {
+      return client.put(ship.id, {
         private_settings: { ...ship.private_settings, mailchimp_list_id: data.id, mailchimp_list_name: data.name }
       }).then(() => {
-        return res.redirect(`${req.baseUrl}${syncUrl}?hullToken=${req.hull.token}`);
+        return res.redirect(`${req.baseUrl}${syncUrl}?hullToken=${req.hull.token}`); // todo req.hull.token exists ?
       });
-    }, mailchimpErrorHandler.bind(this, res, req, ship, hull));
+    }, mailchimpErrorHandler.bind(this, req, res, ship, client));
   }
 
   function renderSync(req, res) {
@@ -163,14 +163,13 @@ export default function oauth({
     const viewData = {
       name,
       select_url: `https://${req.hostname}${req.baseUrl}${selectUrl}?hullToken=${req.hull.token}`,
-      form_action: `https://${req.hostname}/sync?hullToken=${req.hull.token}`,
+      form_action: `https://${req.hostname}/sync?hullToken=${req.hull.token}`, // todo same here
       mailchimp_list_name
     };
     return res.render("sync.html", viewData);
   }
 
   const router = Router();
-  router.use(bodyParser.json());
   router.use(function clearShipCache(req, res, next) {
     // the admin dashboard needs fresh information about
     // ship settings to decide which pane to show.

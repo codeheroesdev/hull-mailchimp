@@ -9,9 +9,9 @@ import Promise from "bluebird";
 
 export default class InterestsMappingAgent {
 
-  constructor(mailchimpClient, hullAgent, ship) {
+  constructor(mailchimpClient, ship, helpers) {
     this.mailchimpClient = mailchimpClient;
-    this.hullAgent = hullAgent;
+    this.helpers = helpers;
     this.ship = ship;
     this.interestsCategoryId = _.get(ship, "private_settings.interest_category_id");
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
@@ -27,7 +27,7 @@ export default class InterestsMappingAgent {
     if (_.isEqual(this.originalMapping, this.mapping) && _.isEqual(this.ship.private_settings.interest_category_id, this.interestsCategoryId)) {
       return Promise.resolve();
     }
-    return this.hullAgent.updateShipSettings({
+    return this.helpers.updateSettings({
       interests_mapping: this.mapping,
       interest_category_id: this.interestsCategoryId
     });

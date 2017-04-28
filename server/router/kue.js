@@ -1,3 +1,4 @@
+/* @flow */
 import { Router } from "express";
 import basicAuth from "basic-auth";
 import ui from "kue-ui";
@@ -21,11 +22,11 @@ function auth(pass) {
   };
 }
 
-export default function KueRouter({ shipConfig, queueAdapter }) {
+export default function KueRouter({ shipConfig, queue }: any) {
   const router = Router();
 
   router.use(auth(shipConfig.hostSecret));
-  router.use("/_api", queueAdapter.app);
+  router.use("/_api", queue.adapter.app);
   router.use("/", ui.app);
 
   return router;

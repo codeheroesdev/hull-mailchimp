@@ -1,18 +1,18 @@
+/* @flow */
 import _ from "lodash";
 
 /**
  * Handles extract sent from Hull with optional setting selected segment_id
  */
-export default function handleBatchExtract(req) {
-  const { syncAgent, queueAgent, hullAgent } = req.shipApp;
+export default function handleBatchExtract(ctx: any, payload: any) {
+  const { syncAgent } = ctx.shipApp;
 
-  req.hull.client.logger.info("batch.handleBatchExtract", req.payload.body);
+  ctx.client.logger.info("batch.handleBatchExtract", payload.body);
 
-  return hullAgent.extractAgent.handleExtract(req.payload.body, req.payload.chunkSize, (users) => {
-    // if the extract contains segmentId information apply it to all users
-    if (req.payload.segmentId) {
+  const handler = (users) => {
+    if (payload.segmentId) {
       users = users.map(u => {
-        u.segment_ids = _.uniq(_.concat(u.segment_ids || [], [req.payload.segmentId]));
+        u.segment_ids = _.uniq(_.concat(u.segment_ids || [], [payload.segmentId]));
         return u;
       });
     }
@@ -20,7 +20,7 @@ export default function handleBatchExtract(req) {
     users = _.filter(users.map(u => {
       // if the user is outside the whitelist, remove it from all segments
       // and don't add to any new segment
-      if (!hullAgent.userWhitelisted(u)) {
+      if (!ctx.shipApp.syncAgent.userWhitelisted(u)) {
         if (syncAgent.userAdded(u)) {
           u.segment_ids = [];
           u.remove_segment_ids = syncAgent.segmentsMappingAgent.getSegmentIds();
@@ -33,6 +33,8 @@ export default function handleBatchExtract(req) {
 
     users = users.map(user => syncAgent.filterUserData(user));
 
-    return queueAgent.create("sendUsers", { users });
-  });
+    return ctx.enqueue("sendUsers", { users });
+  };
+
+  return ctx.client.extract.handle({ body: payload.body, batchSize: payload.chunkSize, handler });
 }

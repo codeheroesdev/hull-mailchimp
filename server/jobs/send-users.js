@@ -1,3 +1,4 @@
+/* @flow */
 import _ from "lodash";
 
 /**
@@ -5,23 +6,24 @@ import _ from "lodash";
  * Adds users to the list, adds users to selected Mailchimp static segments,
  * and removes them from selected segments.
  *
- * @param req Object
+ * @param ctx
+ * @param payload
  */
-export default function sendUsersJob(req) {
-  const { users } = req.payload;
-  const { hullAgent, mailchimpAgent, queueAgent, syncAgent } = req.shipApp;
+export default function sendUsersJob(ctx: any, payload: any) {
+  const { users } = payload;
+  const { mailchimpAgent, syncAgent } = ctx.shipApp;
 
   const usersToAddToList = syncAgent.getUsersToAddToList(users);
   const usersToAddOrRemove = syncAgent.usersToAddOrRemove(users);
 
-  req.hull.client.logger.info("sendUsersJob.ops", {
+  ctx.client.logger.info("sendUsersJob.ops", {
     usersToAddToList: usersToAddToList.length,
     usersToAddOrRemove: usersToAddOrRemove.length
   });
 
-  return mailchimpAgent.ensureWebhookSubscription(req)
+  return mailchimpAgent.ensureWebhookSubscription(ctx)
     .then(() => {
-      return hullAgent.getSegments();
+      return ctx.segments;
     })
     .then(segments => {
       return syncAgent.segmentsMappingAgent.syncSegments(segments)
@@ -34,7 +36,7 @@ export default function sendUsersJob(req) {
     })
     .then(res => {
       if (!_.isEmpty(res.body.errors)) {
-        return queueAgent.create("updateUsers", res.body.errors);
+        return ctx.enqueue("updateUsers", res.body.errors);
       }
       return true;
     })

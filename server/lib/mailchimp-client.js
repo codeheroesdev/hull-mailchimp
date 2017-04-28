@@ -52,8 +52,8 @@ export default class MailchimpClient {
 
   /**
    * Method to handle Mailchimp batch response as a JSON stream
-   * @param  {String} { response_body_url }
    * @return {Stream}
+   * @param response_body_url
    */
   handleResponse({ response_body_url }) {
     const extract = tar.extract();

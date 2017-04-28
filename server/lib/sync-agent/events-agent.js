@@ -10,11 +10,10 @@ import crypto from "crypto";
  */
 export default class EventsAgent {
 
-  constructor(mailchimpClient, hull, ship, instrumentationAgent) {
-    this.client = mailchimpClient;
+  constructor(mailchimpClient, client, ship, metric) {
+    this.client = client;
     this.mailchimpClient = mailchimpClient;
-    this.instrumentationAgent = instrumentationAgent;
-    this.hull = hull;
+    this.metric = metric;
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
     this.listName = _.get(ship, "private_settings.mailchimp_list_name");
   }
@@ -30,7 +29,7 @@ export default class EventsAgent {
   }
 
   getTrackableAutomationEmails() {
-    return this.client
+    return this.mailchimpClient
       .get("/automations")
       .query({
         fields: "automations.id,automations.status,automations.send_time",
@@ -41,7 +40,7 @@ export default class EventsAgent {
       })
       .then(trackableAutomations => {
         return Promise.map(trackableAutomations, automation => {
-          return this.client.get(`/automations/${automation.id}/emails`)
+          return this.mailchimpClient.get(`/automations/${automation.id}/emails`)
           .query({
             fields: "emails.id,emails.status,emails.send_time,emails.settings.title",
           })
@@ -61,10 +60,10 @@ export default class EventsAgent {
    * @return {Promise}
    */
   getTrackableCampaigns() {
-    this.hull.logger.info("getTrackableCampaigns");
+    this.client.logger.info("getTrackableCampaigns");
     const weekAgo = moment().subtract(1, "week");
 
-    return this.client
+    return this.mailchimpClient
       .get("/campaigns")
       .query({
         fields: "campaigns.id,campaigns.status,campaigns.title,campaigns.send_time,campaigns.settings.title",
@@ -74,7 +73,7 @@ export default class EventsAgent {
       .then(response => {
         const res = response.body;
         const trackableCampaigns = res.campaigns.filter(c => ["sent", "sending"].indexOf(c.status) !== -1);
-        this.instrumentationAgent.metricVal("trackable_campaigns", trackableCampaigns.length);
+        this.metric.value("trackable_campaigns", trackableCampaigns.length);
         return trackableCampaigns;
       });
   }
@@ -86,7 +85,7 @@ export default class EventsAgent {
    * @return {Array}
    */
   getEmailActivitiesOps(campaigns) {
-    this.hull.logger.info("getEmailActivities", campaigns);
+    this.client.logger.info("getEmailActivities", campaigns);
     return campaigns.map(c => {
       return {
         method: "GET",
@@ -115,7 +114,7 @@ export default class EventsAgent {
    * @return {Promise}
    */
   getMemberActivities(users) {
-    this.hull.logger.info("getMemberActivities", users.length);
+    this.client.logger.info("getMemberActivities", users.length);
     return Promise.map(users, e => {
       e.email_id = e.email_id || this.getEmailId(e.email);
       return this.mailchimpClient
@@ -157,14 +156,14 @@ export default class EventsAgent {
    * @return {Promise}
    */
   trackEvents(emails) {
-    this.hull.logger.info("trackEvents", emails.length);
+    this.client.logger.info("trackEvents", emails.length);
     const emailTracks = emails.map(email => {
-      const user = this.hull.as({
+      const user = this.client.as({
         email: email.email_address
       });
       return Promise.all(email.activity.map(a => {
         const uniqId = this.getUniqId({ email, activity: a });
-        this.hull.logger.info("trackEvents.track", {
+        this.client.logger.info("trackEvents.track", {
           email: email.email_address,
           action: a.action,
           timestamp: a.timestamp,
@@ -185,9 +184,9 @@ export default class EventsAgent {
   }
 
   /**
-   * @param {Array}
-   * @param {}
    * @type {Array}
+   * @param emailActivites
+   * @param last_track_at
    */
   filterEvents(emailActivites, last_track_at = null) {
     if (last_track_at) {
@@ -238,6 +237,7 @@ export default class EventsAgent {
    * Implements data structure from Segment documentation.
    *
    * @param  {Object} activity
+   * @param email
    * @return {Object}
    */
   getEventProperties(activity, email) {

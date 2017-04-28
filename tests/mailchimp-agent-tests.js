@@ -3,9 +3,16 @@ const assert = require("assert");
 import Promise from "bluebird";
 
 import MailchimpAgent from "../server/lib/mailchimp-agent";
-
+import ClientMock from "./mocks/client-mock";
 
 describe("MailchimpAgent", () => {
+  const client = ClientMock();
+  const ship = {
+    private_settings: {
+      mailchimp_list_id: "test"
+    }
+  };
+
   return;
   describe("fetchAudiencesBySegmentId", () => {
     const tests = [
@@ -76,7 +83,7 @@ describe("MailchimpAgent", () => {
           private_settings: test.shipPrivateSettings
         };
 
-        const mailchimpAgent = new MailchimpAgent(shipStub, hullStub, reqStub, MailchimpClientStub);
+        const mailchimpAgent = new MailchimpAgent(shipStub, { client, ship });
 
         return mailchimpAgent.fetchAudiencesBySegmentId()
         .then(res => {

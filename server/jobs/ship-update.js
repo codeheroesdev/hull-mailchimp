@@ -1,15 +1,16 @@
+/* @flow */
 /**
  * Makes sure that all existing Hull segments have mapped Mailchimp static segment
  */
-export default function shipUpdateHandlerJob(req) {
-  const { syncAgent, mailchimpAgent } = req.shipApp;
+export default function shipUpdateHandlerJob(ctx: any) {
+  const { syncAgent, mailchimpAgent } = ctx.shipApp;
   if (!syncAgent.isConfigured()) {
-    req.hull.client.logger.error("ship not configured");
+    ctx.client.logger.error("ship not configured");
     return Promise.resolve();
   }
 
-  mailchimpAgent.ensureWebhookSubscription(req);
-  return req.shipApp.hullAgent.getSegments()
+  mailchimpAgent.ensureWebhookSubscription(ctx);
+  return Promise.resolve(ctx.segments)
     .then(segments => {
       return syncAgent.segmentsMappingAgent.syncSegments(segments)
         .then(() => syncAgent.segmentsMappingAgent.updateMapping())

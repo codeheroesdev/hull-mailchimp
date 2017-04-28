@@ -1,7 +1,7 @@
-
-
-export default function schemaUserFields(req, res) {
-  req.shipApp.mailchimpAgent.getMergeFields()
+/* @flow */
+import { Request, Response } from "express";
+export default function schemaUserFields(req: Request, res: Response) {
+  req.hull.shipApp.mailchimpAgent.getMergeFields()
     .then(resBody => {
       res.json({
         options: resBody.merge_fields.map(f => {

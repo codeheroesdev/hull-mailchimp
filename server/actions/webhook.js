@@ -1,5 +1,7 @@
+/* @flow */
+import { Request, Response } from "express";
 
-export default function handleAction(req, res) {
+export default function handleAction(req: Request, res: Response) {
   const { body = {}, method = "" } = req;
   const { syncAgent } = req.shipApp;
 

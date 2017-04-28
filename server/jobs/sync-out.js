@@ -1,17 +1,18 @@
+/* @flow */
 /**
  * Sync all operation handler. It drops all Mailchimp Segments aka Audiences
  * then creates them according to `segment_mapping` settings and triggers
  * sync for all users
  */
-export default function syncOutJob(req) {
-  const { syncAgent, hullAgent } = req.shipApp;
-  const client = req.hull.client;
+export default function syncOutJob(ctx: any) {
+  const { syncAgent } = ctx.shipApp;
+  const client = ctx.client;
 
   client.logger.info("request.sync.start");
 
   return syncAgent.segmentsMappingAgent.syncSegments()
     .then(() => syncAgent.interestsMappingAgent.syncInterests())
-    .then(() => hullAgent.getSegments())
+    .then(() => Promise.resolve(ctx.segments))
     .then(segments => {
       return syncAgent.interestsMappingAgent.ensureCategory()
         .then(() => syncAgent.interestsMappingAgent.syncInterests(segments))
@@ -20,6 +21,6 @@ export default function syncOutJob(req) {
     })
     .then(() => {
       const fields = syncAgent.userMappingAgent.getExtractFields();
-      return hullAgent.extractAgent.requestExtract({ fields });
+      return ctx.helpers.requestExtract({ fields });
     });
 }

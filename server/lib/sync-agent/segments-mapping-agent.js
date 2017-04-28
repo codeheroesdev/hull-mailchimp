@@ -8,10 +8,10 @@ import Promise from "bluebird";
  */
 export default class SegmentsAgent {
 
-  constructor(mailchimpClient, hullAgent, ship) {
+  constructor(mailchimpClient, ship, helpers) {
     this.mailchimpClient = mailchimpClient;
-    this.hullAgent = hullAgent;
     this.ship = ship;
+    this.helpers = helpers;
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
     this.mapping = _.get(this.ship, "private_settings.segment_mapping", {});
     this.originalMapping = _.cloneDeep(this.mapping);
@@ -25,11 +25,11 @@ export default class SegmentsAgent {
     if (_.isEqual(this.originalMapping, this.mapping)) {
       return Promise.resolve();
     }
-    return this.hullAgent.updateShipSettings({
+    return this.helpers.updateSettings({
       segment_mapping: this.mapping
     });
     // this.ship.private_settings[this.settingKey] = this.mapping;
-    // return this.hullClient.put(this.ship.id, { private_settings: this.ship.private_settings });
+    // return this.client.put(this.ship.id, { private_settings: this.ship.private_settings });
   }
 
   /**

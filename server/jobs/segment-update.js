@@ -1,13 +1,14 @@
+/* @flow */
 import Promise from "bluebird";
 
-export default function segmentUpdateHandlerJob(req) {
-  const { segment } = req.payload;
+export default function segmentUpdateHandlerJob(ctx: any, payload: any) {
+  const { segment } = payload.message;
   console.warn("[segmentUpdateHandler] start", JSON.stringify({ segment }));
 
-  const { syncAgent, hullAgent } = req.shipApp;
+  const { syncAgent } = ctx.shipApp;
 
   if (!syncAgent.isConfigured()) {
-    req.hull.client.logger.error("ship not configured");
+    ctx.client.logger.error("ship not configured");
 
     console.warn("[segmentUpdateHandler] ship not configured");
     return Promise.resolve();
@@ -27,7 +28,7 @@ export default function segmentUpdateHandlerJob(req) {
     agent => agent.recreateSegment(segment)
   ).then(() => {
     console.warn("[segmentUpdateHandler] requestExtract for ", segment.name);
-    return hullAgent.extractAgent.requestExtract({ segment, fields: syncAgent.userMappingAgent.getExtractFields() });
+    return ctx.helpers.requestExtract({ segment, fields: syncAgent.userMappingAgent.getExtractFields() });
   }).catch(err => {
     console.warn("[segmentUpdateHandler] Error ", err);
   });

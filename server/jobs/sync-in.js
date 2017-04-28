@@ -1,8 +1,9 @@
+/* @flow */
 /**
  * SyncIn : import all the list members as hull users
  */
-export default function syncInJob(req) {
-  const { mailchimpAgent } = req.shipApp;
+export default function syncInJob(ctx: any) {
+  const { mailchimpAgent } = ctx.shipApp;
   const exclude = [
     "_links",
     "members._links",

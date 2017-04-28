@@ -8,18 +8,17 @@ import EventsAgent from "./events-agent";
 
 export default class SyncAgent {
 
-  constructor(mailchimpClient, hullAgent, ship, instrumentationAgent) {
+  constructor(mailchimpClient, { client, ship, helpers, metric }) {
     this.ship = ship;
     this.mailchimpClient = mailchimpClient;
-    this.hullAgent = hullAgent;
-    this.logger = this.hullAgent.hullClient.logger;
+    this.client = client;
+    this.logger = client.logger;
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
-    this.instrumentationAgent = instrumentationAgent;
 
-    this.segmentsMappingAgent = new SegmentsMappingAgent(mailchimpClient, hullAgent, ship);
-    this.interestsMappingAgent = new InterestsMappingAgent(mailchimpClient, hullAgent, ship);
-    this.userMappingAgent = new UserMappingAgent(ship, hullAgent.hullClient);
-    this.eventsAgent = new EventsAgent(mailchimpClient, hullAgent.hullClient, ship, instrumentationAgent);
+    this.segmentsMappingAgent = new SegmentsMappingAgent(mailchimpClient, ship, helpers);
+    this.interestsMappingAgent = new InterestsMappingAgent(mailchimpClient, ship, helpers);
+    this.userMappingAgent = new UserMappingAgent(ship, client);
+    this.eventsAgent = new EventsAgent(mailchimpClient, client, ship, metric);
   }
 
   isConfigured() {
@@ -30,8 +29,8 @@ export default class SyncAgent {
   }
 
   getUsersToAddToList(users) {
-    return users.filter(u => this.hullAgent.userComplete(u) && !this.userWithError(u)
-      && this.hullAgent.userWhitelisted(u));
+    return users.filter(u => !_.isEmpty(u.email) && !this.userWithError(u)
+      && this.userWhitelisted(u));
   }
 
   usersToAddOrRemove(users) {
@@ -44,6 +43,14 @@ export default class SyncAgent {
 
   userWithError(user) {
     return !_.isEmpty(user["traits_mailchimp/import_error"]);
+  }
+
+  userWhitelisted(user) {
+    const segmentIds = _.get(this.ship, "private_settings.synchronized_segments", []);
+    if (segmentIds.length === 0) {
+      return true;
+    }
+    return _.intersection(segmentIds, user.segment_ids).length > 0;
   }
 
   addToList(users) {

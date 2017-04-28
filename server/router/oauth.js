@@ -1,7 +1,7 @@
+/* @flow */
 import oauth from "../lib/oauth-client";
-// import { Router } from "express";
 
-export default function OAuthRouter({ shipConfig, hullMiddleware }) {
+export default function OAuthRouter({ shipConfig, hullMiddleware }: any) {
   return oauth({
     name: "Mailchimp",
     clientID: shipConfig.clientID,

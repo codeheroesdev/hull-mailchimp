@@ -13,11 +13,11 @@ import moment from "moment";
  */
 export default class MailchimpBatchAgent {
 
-  constructor(hullClient, mailchimpClient, queueAgent, instrumentationAgent) {
-    this.hullClient = hullClient;
+  constructor(ctx, mailchimpClient) {
+    this.ctx = ctx;
+    this.client = ctx.client;
+    this.metric = ctx.metric;
     this.mailchimpClient = mailchimpClient;
-    this.queueAgent = queueAgent;
-    this.instrumentationAgent = instrumentationAgent;
   }
 
   /**
@@ -37,24 +37,24 @@ export default class MailchimpBatchAgent {
     if (_.isEmpty(operations)) {
       return Promise.resolve([]);
     }
-    this.instrumentationAgent.metricInc("batch_job.count");
+    this.metric.increment("batch_job.count", 1);
     return this.mailchimpClient
       .post("/batches")
       .send({ operations })
       .then(response => {
         const { id } = response.body;
-        this.hullClient.logger.info("handleMailchimpBatchJob.create", id);
+        this.client.logger.info("handleMailchimpBatchJob.create", id);
         // if jobs argument is empty, we don't perform next tasks on
         // returned data, so we don't need to queue a handler here
         if (_.isEmpty(jobs)) {
           return Promise.resolve();
         }
         options.batchId = id;
-        return this.queueAgent.create("handleMailchimpBatch", options, { delay: process.env.MAILCHIMP_BATCH_HANDLER_INTERVAL || 10000 });
+        return this.ctx.enqueue("handleMailchimpBatch", options, { delay: process.env.MAILCHIMP_BATCH_HANDLER_INTERVAL || 10000 });
       })
       .catch(err => {
         const filteredError = this.mailchimpClient.handleError(err);
-        this.hullClient.logger.error("mailchimpBatchAgent.create.error", filteredError.message);
+        this.client.logger.error("mailchimpBatchAgent.create.error", filteredError.message);
         return Promise.reject(filteredError);
       });
   }
@@ -63,27 +63,27 @@ export default class MailchimpBatchAgent {
    * checks if the batch is finished
    * @api
    */
-  handle(options) {
+  handle(options) { // todo batchId is never passed
     const { batchId, attempt = 1, jobs = [], chunkSize, extractField, additionalData } = options;
     return this.mailchimpClient
       .get(`/batches/${batchId}`)
       .then((response) => {
         const batchInfo = response.body;
-        this.hullClient.logger.info("mailchimpBatchAgent.handleBatch", _.omit(batchInfo, "_links"));
+        this.client.logger.info("mailchimpBatchAgent.handleBatch", _.omit(batchInfo, "_links"));
         if (batchInfo.status !== "finished") {
           if (attempt < 6000) {
             options.attempt++;
-            return this.queueAgent.create("handleMailchimpBatch", options, {
+            return this.ctx.enqueue("handleMailchimpBatch", options, {
               delay: process.env.MAILCHIMP_BATCH_HANDLER_INTERVAL || 10000
             });
           }
-          this.instrumentationAgent.metricInc("batch_job.hanged");
-          this.hullClient.logger.error("mailchimpBatchAgent.batch_job_hanged", _.omit(batchInfo, "_links"));
+          this.metric.increment("batch_job.hanged", 1);
+          this.client.logger.error("mailchimpBatchAgent.batch_job_hanged", _.omit(batchInfo, "_links"));
           return this.mailchimpClient.delete(`/batches/${batchId}`);
         }
 
-        this.instrumentationAgent.metricVal("batch_job.attempts", attempt);
-        this.instrumentationAgent.metricVal(
+        this.metric.increment("batch_job.attempts", attempt);
+        this.metric.value(
           "batch_job.completion_time",
           moment(batchInfo.completed_at).diff(batchInfo.submitted_at, "seconds")
         );
@@ -114,7 +114,7 @@ export default class MailchimpBatchAgent {
             try {
               return Promise.all(_.map(jobs, (job) => {
                 console.log("JOB", job, ops.length);
-                return this.queueAgent.create(job, {
+                return this.ctx.enqueue(job, {
                   response: ops,
                   additionalData
                 });

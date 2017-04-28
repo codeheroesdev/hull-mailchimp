@@ -1,9 +1,10 @@
+/* @flow */
 import _ from "lodash";
 
-export default function trackEmailActivites(req) {
-  const { syncAgent, instrumentationAgent } = req.shipApp;
-  let emailActivites = _.get(req.payload, "response", []);
-  const { last_track_at, campaigns } = req.payload.additionalData;
+export default function trackEmailActivites(ctx: any, payload: any) {
+  const { syncAgent } = ctx.shipApp;
+  let emailActivites = _.get(payload, "response", []);
+  const { last_track_at, campaigns } = payload.additionalData;
 
   emailActivites = syncAgent.eventsAgent.filterEvents(emailActivites, last_track_at);
 
@@ -13,6 +14,6 @@ export default function trackEmailActivites(req) {
     return emailActivity;
   });
 
-  instrumentationAgent.metricInc("track.email_activites_for_campaign", emailActivites.length);
+  ctx.metric.increment("track.email_activites_for_campaign", emailActivites.length);
   return syncAgent.eventsAgent.trackEvents(emailActivites);
 }

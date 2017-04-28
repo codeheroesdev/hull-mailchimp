@@ -1,9 +1,9 @@
+/* @flow */
 /**
  * Parses the extract results and queues chunks for export operations
- * @param  {String} body
- * @param  {Number} chunkSize
  * @return {Promise}
+ * @param req
  */
-export default function handleMailchimpBatch(req) {
+export default function handleMailchimpBatch(req: any) {
   return req.shipApp.mailchimpAgent.batchAgent.handle(req.payload);
 }

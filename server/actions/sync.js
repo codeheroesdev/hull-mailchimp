@@ -1,3 +1,5 @@
+/* @flow */
+import { Request, Response, Next } from "express";
 import Promise from "bluebird";
 
 /**
@@ -5,9 +7,9 @@ import Promise from "bluebird";
  * of these operations to be finished since both of them include
  * requesting userbase extract from Hull API and Mailchimp API.
  */
-export default function sync(req, res, next) {
+export default function sync(req: Request, res: Response, next: Next) {
   return Promise.all([
-    req.shipApp.queueAgent.create("syncOut"),
-    req.shipApp.queueAgent.create("syncIn")
+    req.hull.enqueue("syncOut"),
+    req.hull.enqueue("syncIn")
   ]).then(next, next);
 }

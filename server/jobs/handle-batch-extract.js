@@ -4,7 +4,7 @@ import _ from "lodash";
 /**
  * Handles extract sent from Hull with optional setting selected segment_id
  */
-export default function handleBatchExtract(ctx: any, payload: any) {
+export default function handleBatchExtract(ctx, payload) {
   const { syncAgent } = ctx.shipApp;
 
   ctx.client.logger.info("batch.handleBatchExtract", payload.body);

@@ -4,11 +4,11 @@
  */
 import Hull from "hull";
 
-import { Queue, Cache } from "hull/lib/utils";
+import { Queue, Cache } from "hull/lib/infra";
 
-import * as Jobs from "./jobs";
-import * as Actions from "./actions";
-import * as NotifHandlers from "./notif-handlers";
+import * as jobs from "./jobs";
+import * as actions from "./actions";
+import * as notifHandlers from "./notif-handlers";
 
 const {
   PORT = 8082,
@@ -54,7 +54,7 @@ export default {
   shipConfig,
   cache,
   queue,
-  Jobs,
-  Actions,
-  NotifHandlers
+  jobs,
+  actions,
+  notifHandlers
 };

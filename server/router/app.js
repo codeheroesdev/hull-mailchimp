@@ -1,7 +1,7 @@
 /* @flow */
 import { Router } from "express";
 import bodyParser from "body-parser";
-import { notifHandler } from "hull/lib/infra";
+import { notifHandler } from "hull/lib/utils";
 import cors from "cors";
 
 import responseMiddleware from "../lib/middlewares/response";

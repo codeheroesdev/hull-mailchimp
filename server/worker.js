@@ -1,4 +1,13 @@
-import bootstrap from "./bootstrap";
-import WorkerJobs from "./worker-jobs";
+/* @flow */
+import AppMiddleware from "./lib/middlewares/app";
+import { helpersMiddleware } from "hull/lib/utils";
 
-WorkerJobs(bootstrap);
+export default function worker(options: any = {}) {
+  const { connector, jobs } = options;
+
+  connector.worker(jobs)
+    .use(helpersMiddleware()) // workaround over bug in hull-node
+    .use(AppMiddleware());
+
+  connector.startWorker();
+}

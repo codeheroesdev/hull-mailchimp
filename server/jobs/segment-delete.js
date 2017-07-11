@@ -6,7 +6,7 @@ export default function segmentDeleteHandlerJob(ctx: any, payload: any) {
   const { segment } = payload.message;
   const { syncAgent } = ctx.shipApp;
   if (!syncAgent.isConfigured()) {
-    ctx.client.logger.error("ship not configured");
+    ctx.client.logger.error("connector.configuration.error", { errors: "connector not configured" });
     return Promise.resolve();
   }
   return syncAgent.segmentsMappingAgent.deleteSegment(segment)

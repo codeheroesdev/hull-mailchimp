@@ -13,10 +13,14 @@ export default function sendUsersJob(ctx: any, payload: any) {
   const { users } = payload;
   const { mailchimpAgent, syncAgent } = ctx.shipApp;
 
+  const { logger } = ctx.client;
+
   const usersToAddToList = syncAgent.getUsersToAddToList(users);
   const usersToAddOrRemove = syncAgent.usersToAddOrRemove(users);
 
-  ctx.client.logger.info("sendUsersJob.ops", {
+  logger.debug("incoming.users.start", {
+    jobName: "update-users",
+    type: "user",
     usersToAddToList: usersToAddToList.length,
     usersToAddOrRemove: usersToAddOrRemove.length
   });
@@ -41,7 +45,7 @@ export default function sendUsersJob(ctx: any, payload: any) {
       return syncAgent.saveToAudiences(usersToAddOrRemove);
     })
     .catch((err = {}) => {
-      console.log("sendUsersJob.error", err.message);
+      logger.error("incoming.user.error", { errors: err.message });
       return Promise.reject(err);
     });
 }

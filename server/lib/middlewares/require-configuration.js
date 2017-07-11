@@ -9,7 +9,7 @@ import { Request, Response, Next } from "express";
  */
 export default function requireConfiguration(req: Request, res: Response, next: Next) {
   if (!req.hull.shipApp.syncAgent.isConfigured()) {
-    req.hull.client.logger.info("ship is not configured");
+    req.client.logger.error("connector.configuration.error", { errors: "connector not configured" });
     return res.status(403).send("Ship is not configured");
   }
   return next();

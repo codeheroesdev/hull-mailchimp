@@ -66,7 +66,7 @@ export default class MailchimpAgent {
     return this.getWebhook(req)
       .then(hook => hook || this.createWebhook(req))
       .catch(err => {
-        console.warn("Error creating webhook ", err.message);
+        this.client.logger.warn("webhook.error", { errors: err.message, step: "creating" });
         return Promise.reject(this.mailchimpClient.handleError(err));
       });
   }
@@ -80,7 +80,7 @@ export default class MailchimpAgent {
       })
       .then(({ body }) => body)
       .catch(err => {
-        console.warn("Error getting merge fields", err.message);
+        this.client.logger.warn("webhook.error", { errors: err.message, step: "getting merge fields" });
         return Promise.reject(this.mailchimpClient.handleError(err));
       });
   }

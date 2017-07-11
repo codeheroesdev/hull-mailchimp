@@ -43,7 +43,7 @@ export default class MailchimpBatchAgent {
       .send({ operations })
       .then(response => {
         const { id } = response.body;
-        this.client.logger.info("handleMailchimpBatchJob.create", id);
+        this.client.logger.info("outgoing.job.start", { id, jobName: "mailchimp-batch-job", type: "user" });
         // if jobs argument is empty, we don't perform next tasks on
         // returned data, so we don't need to queue a handler here
         if (_.isEmpty(jobs)) {
@@ -54,7 +54,7 @@ export default class MailchimpBatchAgent {
       })
       .catch(err => {
         const filteredError = this.mailchimpClient.handleError(err);
-        this.client.logger.error("mailchimpBatchAgent.create.error", filteredError.message);
+        this.client.logger.error("outgoing.job.error", { jobName: "mailchimp-batch-job", errors: filteredError.message });
         return Promise.reject(filteredError);
       });
   }
@@ -69,7 +69,9 @@ export default class MailchimpBatchAgent {
       .get(`/batches/${batchId}`)
       .then((response) => {
         const batchInfo = response.body;
-        this.client.logger.info("mailchimpBatchAgent.handleBatch", _.omit(batchInfo, "_links"));
+        this.client.logger.info("outgoing.job.progress", {
+          jobName: "mailchimp-batch-job",
+          progress: _.omit(batchInfo, "_links") });
         if (batchInfo.status !== "finished") {
           if (attempt < 6000) {
             options.attempt++;
@@ -78,7 +80,10 @@ export default class MailchimpBatchAgent {
             });
           }
           this.metric.increment("batch_job.hanged", 1);
-          this.client.logger.error("mailchimpBatchAgent.batch_job_hanged", _.omit(batchInfo, "_links"));
+          this.client.logger.error("outgoing.job.error", {
+            jobName: "mailchimp-batch-job",
+            data: _.omit(batchInfo, "_links"),
+            errors: "batch_job_hanged" });
           return this.mailchimpClient.delete(`/batches/${batchId}`);
         }
 
@@ -113,14 +118,14 @@ export default class MailchimpBatchAgent {
           .pipe(ps.map((ops) => {
             try {
               return Promise.all(_.map(jobs, (job) => {
-                console.log("JOB", job, ops.length);
+                this.client.logger.debug("JOB", { job, length: ops.length });
                 return this.ctx.enqueue(job, {
                   response: ops,
                   additionalData
                 });
               }));
             } catch (e) {
-              console.error(e);
+              this.client.logger.debug({ errors: e });
               return Promise.reject(e);
             }
           }))

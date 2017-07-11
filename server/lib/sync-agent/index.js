@@ -104,7 +104,7 @@ export default class SyncAgent {
           .post(`/lists/${this.listId}/segments/${audienceId}`)
           .send(operation)
           .catch(err => {
-            console.warn("Error modyfing static segments", err.message);
+            this.logger.warn("Error modyfing static segments", err.message);
             return Promise.reject(this.mailchimpClient.handleError(err));
           });
       };

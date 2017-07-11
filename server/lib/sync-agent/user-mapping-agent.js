@@ -106,7 +106,7 @@ export default class UserMappingAgent {
     this.client.logger.debug("incoming.userData", { ident, traits });
 
     return this.client
-      .as(ident)
+      .asUser(ident)
       .traits(traits);
   }
 

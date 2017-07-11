@@ -13,7 +13,7 @@ export default function () {
       return next();
     }
 
-    const mailchimpClient = new MailchimpClient(req.hull.ship);
+    const mailchimpClient = new MailchimpClient(req.hull);
 
     const mailchimpAgent = new MailchimpAgent(mailchimpClient, req.hull);
     const syncAgent = new SyncAgent(mailchimpClient, req.hull);

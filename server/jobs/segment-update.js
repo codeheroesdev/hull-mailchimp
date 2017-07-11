@@ -3,14 +3,14 @@ import Promise from "bluebird";
 
 export default function segmentUpdateHandlerJob(ctx: any, payload: any) {
   const { segment } = payload.message;
-  console.warn("[segmentUpdateHandler] start", JSON.stringify({ segment }));
+  ctx.client.logger.debug("[segmentUpdateHandler] start", JSON.stringify({ segment }));
 
   const { syncAgent } = ctx.shipApp;
 
   if (!syncAgent.isConfigured()) {
-    ctx.client.logger.error("ship not configured");
+    ctx.client.logger.error("connector.configuration.error", { errors: "connector not configured" });
 
-    console.warn("[segmentUpdateHandler] ship not configured");
+    ctx.client.logger.debug("[segmentUpdateHandler] ship not configured");
     return Promise.resolve();
   }
 
@@ -27,9 +27,9 @@ export default function segmentUpdateHandlerJob(ctx: any, payload: any) {
     agents,
     agent => agent.recreateSegment(segment)
   ).then(() => {
-    console.warn("[segmentUpdateHandler] requestExtract for ", segment.name);
+    ctx.client.logger.debug("[segmentUpdateHandler] requestExtract for ", segment.name);
     return ctx.helpers.requestExtract({ segment, fields: syncAgent.userMappingAgent.getExtractFields() });
   }).catch(err => {
-    console.warn("[segmentUpdateHandler] Error ", err);
+    ctx.client.logger.debug("[segmentUpdateHandler] Error ", err);
   });
 }

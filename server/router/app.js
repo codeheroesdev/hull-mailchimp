@@ -30,7 +30,7 @@ export default function AppRouter(deps: any) {
       "segment:update": notifHandlers.segmentUpdate,
       "segment:delete": notifHandlers.segmentDelete,
       "user:update": notifHandlers.userUpdate,
-      "ship:update": notifHandlers.shipUpdat
+      "ship:update": notifHandlers.shipUpdate
     }
   }));
 

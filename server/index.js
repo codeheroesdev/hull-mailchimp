@@ -3,12 +3,16 @@
  * Main project dependencies
  */
 import Hull from "hull";
+import express from "express";
 
-import { Queue, Cache } from "hull/lib/infra";
+import Server from "./server";
+import Worker from "./worker";
 
 import * as jobs from "./jobs";
 import * as actions from "./actions";
 import * as notifHandlers from "./notif-handlers";
+
+import { Queue, Cache } from "hull/lib/infra";
 
 const {
   PORT = 8082,
@@ -19,12 +23,15 @@ const {
   KUE_PREFIX = "hull-mailchimp",
   REDIS_URL,
   SHIP_CACHE_MAX,
-  SHIP_CACHE_TTL
+  SHIP_CACHE_TTL,
+  OVERRIDE_FIREHOSE_URL,
+  COMBINED
 } = process.env;
 
 if (LOG_LEVEL) {
   Hull.logger.transports.console.level = LOG_LEVEL;
 }
+
 Hull.logger.transports.console.stringify = true;
 
 
@@ -46,9 +53,17 @@ const queue = new Queue("kue", {
 });
 
 
-const connector = new Hull.Connector({ hostSecret: SECRET, port: PORT, cache, queue });
+const connector = new Hull.Connector({
+  hostSecret: SECRET,
+  port: PORT,
+  cache,
+  queue,
+  clientConfig: {
+    firehoseUrl: OVERRIDE_FIREHOSE_URL
+  }
+});
 
-export default {
+const options = {
   hullMiddleware: connector.clientMiddleware(),
   connector,
   shipConfig,
@@ -58,3 +73,15 @@ export default {
   actions,
   notifHandlers
 };
+
+let app = express();
+
+connector.setupApp(app);
+
+app = Server(app, options);
+
+connector.startApp(app);
+
+if (COMBINED) {
+  Worker(options);
+}

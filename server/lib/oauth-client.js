@@ -28,7 +28,7 @@ export default function oauth({
    */
   function mailchimpErrorHandler(req, res, ship, client, err) {
     if (err.statusCode === 401) {
-      client.logger.info("Mailchimp /lists query returned 401 - ApiKey is invalid");
+      client.logger.debug("Mailchimp /lists query returned 401 - ApiKey is invalid");
       client.put(ship.id, {
         private_settings: { ...ship.private_settings, api_key: null, mailchimp_list_id: null }
       }).then(() => {

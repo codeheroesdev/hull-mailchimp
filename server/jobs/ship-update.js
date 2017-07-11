@@ -5,7 +5,7 @@
 export default function shipUpdateHandlerJob(ctx: any) {
   const { syncAgent, mailchimpAgent } = ctx.shipApp;
   if (!syncAgent.isConfigured()) {
-    ctx.client.logger.error("ship not configured");
+    ctx.client.logger.error("connector.configuration.error", { errors: "connector not configured" });
     return Promise.resolve();
   }
 

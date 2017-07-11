@@ -4,15 +4,16 @@ import _ from "lodash";
 /**
  * Handles events of user
  */
-export default function userUpdateHandlerJob(ctx: any, payload: any) {
-  const { queueAgent, syncAgent } = ctx.shipApp;
+export default function userUpdateHandlerJob(ctx: any, payload) {
+  const { syncAgent } = ctx.shipApp;
+
 
   if (!syncAgent.isConfigured()) {
-    ctx.client.logger.error("ship not configured");
+    ctx.client.logger.error("connector.configuration.error", { errors: "connector not configured" });
     return Promise.resolve();
   }
 
-  ctx.client.logger.info("userUpdateHandlerJob", payload.messages.length);
+  ctx.client.logger.debug("userUpdateHandlerJob", payload.messages.length);
   const users = payload.messages.reduce((accumulator, message) => {
     const { user, changes = {}, segments = [] } = message;
     const { left = [] } = changes.segments || {};
@@ -42,11 +43,11 @@ export default function userUpdateHandlerJob(ctx: any, payload: any) {
 
   const promises = [];
   if (users.length > 0) {
-    promises.push(queueAgent.create("sendUsers", { users }));
+    promises.push(ctx.enqueue("sendUsers", { users }));
   }
 
   if (usersToTrack.length > 0) {
-    promises.push(queueAgent.create("trackUsers", { users: usersToTrack }));
+    promises.push(ctx.enqueue("trackUsers", { users: usersToTrack }));
   }
 
   return Promise.all(promises);

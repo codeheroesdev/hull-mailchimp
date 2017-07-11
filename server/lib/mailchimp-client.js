@@ -9,10 +9,12 @@ import _ from "lodash";
 
 export default class MailchimpClient {
 
-  constructor(ship) {
+  constructor(options) {
+    const { ship, client } = options;
     this.apiKey = _.get(ship, "private_settings.api_key");
     this.domain = _.get(ship, "private_settings.domain");
     this.listId = _.get(ship, "private_settings.mailchimp_list_id");
+    this.client = client;
     this.req = request;
   }
 
@@ -26,7 +28,7 @@ export default class MailchimpClient {
       .use(superagentPromisePlugin)
       .set({ Authorization: `OAuth ${this.apiKey}` })
       .on("request", (reqData) => {
-        console.log("REQ", reqData.method, reqData.url);
+        this.client.logger.debug("REQ", reqData.method, reqData.url);
       });
   }
 

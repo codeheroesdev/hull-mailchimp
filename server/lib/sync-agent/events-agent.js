@@ -60,7 +60,7 @@ export default class EventsAgent {
    * @return {Promise}
    */
   getTrackableCampaigns() {
-    this.client.logger.info("getTrackableCampaigns");
+    this.client.logger.debug("getTrackableCampaigns");
     const weekAgo = moment().subtract(1, "week");
 
     return this.mailchimpClient
@@ -85,7 +85,7 @@ export default class EventsAgent {
    * @return {Array}
    */
   getEmailActivitiesOps(campaigns) {
-    this.client.logger.info("getEmailActivities", campaigns);
+    this.client.logger.debug("getEmailActivities", campaigns);
     return campaigns.map(c => {
       return {
         method: "GET",
@@ -114,7 +114,7 @@ export default class EventsAgent {
    * @return {Promise}
    */
   getMemberActivities(users) {
-    this.client.logger.info("getMemberActivities", users.length);
+    this.client.logger.debug("getMemberActivities", users.length);
     return Promise.map(users, e => {
       e.email_id = e.email_id || this.getEmailId(e.email);
       return this.mailchimpClient
@@ -156,14 +156,14 @@ export default class EventsAgent {
    * @return {Promise}
    */
   trackEvents(emails) {
-    this.client.logger.info("trackEvents", emails.length);
+    this.client.logger.debug("trackEvents", emails.length);
     const emailTracks = emails.map(email => {
-      const user = this.client.asUser({
+      const asUser = this.client.asUser({
         email: email.email_address
       });
       return Promise.all(email.activity.map(a => {
         const uniqId = this.getUniqId({ email, activity: a });
-        this.client.logger.info("trackEvents.track", {
+        asUser.logger.debug("trackEvents.track", {
           email: email.email_address,
           action: a.action,
           timestamp: a.timestamp,
@@ -172,7 +172,7 @@ export default class EventsAgent {
         const eventName = this.getEventName(a);
         const props = this.getEventProperties(a, email);
 
-        return user.track(eventName, props, {
+        return asUser.track(eventName, props, {
           source: "mailchimp",
           event_id: uniqId,
           created_at: a.timestamp

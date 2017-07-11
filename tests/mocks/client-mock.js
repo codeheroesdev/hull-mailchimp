@@ -19,7 +19,7 @@ module.exports = function getClientMock() {
     utils: {
       extract: {
         handle: ({ body, batchSize, handler }) => {
-          return Promise.resolve([handler(this, [
+          return Promise.resolve([handler([
             { id: "test", name: "test", segment_ids: [1, 123] }
           ])]);
         }

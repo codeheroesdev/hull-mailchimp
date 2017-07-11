@@ -4,7 +4,7 @@ import _ from "lodash";
 /**
  * Handles events of user
  */
-export default function userUpdateHandlerJob(ctx: any, payload) {
+export default function userUpdateHandlerJob(ctx: any, payload: any) {
   const { syncAgent } = ctx.shipApp;
 
 

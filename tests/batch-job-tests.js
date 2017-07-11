@@ -31,8 +31,8 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
         utils: {
           extract: {
             handle: ({ body, batchSize, handler }) => {
-              return Promise.resolve([handler(ctx, [
-                { id: "test", name: "test", segment_ids: [1, 123] }
+              return Promise.resolve([handler([
+                { id: "test", name: "test", segment_ids: ["1", "123"] }
               ])]);
             }
           }
@@ -40,12 +40,14 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       }
     };
     return handleBatchExtract(
-      ctxMockedWithUtils,
+      ctx,
       {
         body: {
           url: "http://link-to-file.localhost/test.json",
           format: "json"
-        }
+        },
+        batchSize: 3,
+        segmentId: "123"
       }
     )
       .then(() => {
@@ -71,9 +73,9 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
         utils: {
           extract: {
             handle: ({ body, batchSize, handler }) => {
-              return Promise.resolve([handler(ctx, [
-                { user: { id: "test", name: "test", segment_ids: [1, 123] } }
-              ])]);
+              return Promise.resolve(handler([
+                { id: "test", name: "test", segment_ids: [1, 123] }
+              ]));
             }
           }
         }
@@ -89,12 +91,13 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       )
       .returns(Promise.resolve());
 
-    return handleBatchExtract(ctxMockedWithUtils,
+    return handleBatchExtract(ctx,
       {
         body: {
           url: "http://link-to-file.localhost/test.json",
           format: "json"
         },
+        batchSize: 3,
         segmentId: "abc"
       })
       .then(() => {

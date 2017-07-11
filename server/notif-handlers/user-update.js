@@ -4,7 +4,7 @@ import _ from "lodash";
 /**
  * Handles events of user
  */
-export default function userUpdateHandler(ctx: any, messages = []) {
+export default function userUpdateHandler(ctx: any, messages: any = []) {
   const filteredMessages = messages.reduce((accumulator, message) => {
     const { changes = {}, user } = message;
 

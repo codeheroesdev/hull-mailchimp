@@ -1,6 +1,6 @@
 /* @flow */
-import AppMiddleware from "./lib/middlewares/app";
 import { helpersMiddleware } from "hull/lib/utils";
+import AppMiddleware from "../server/lib/middlewares/app";
 
 export default function worker(options: any = {}) {
   const { connector, jobs } = options;

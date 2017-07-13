@@ -21,7 +21,7 @@ export default function AppRouter(deps: any) {
   const middlewareSet = [tokenMiddleware, requireConfiguration];
 
   router.use(AppMiddleware());
-  router.post("/batch", requireConfiguration, ...middlewareSet, actions.handleBatchExtract, responseMiddleware);
+  router.post("/batch", ...middlewareSet, actions.handleBatchExtract, responseMiddleware);
   router.use("/notify", requireConfiguration, notifHandler({
     userHandlerOptions: {
       groupTraits: false
@@ -34,8 +34,8 @@ export default function AppRouter(deps: any) {
     }
   }));
 
-  router.post("/sync", requireConfiguration, ...middlewareSet, actions.sync, responseMiddleware);
-  router.post("/track", requireConfiguration, ...middlewareSet, actions.track, responseMiddleware);
+  router.post("/sync", ...middlewareSet, actions.sync, responseMiddleware);
+  router.post("/track", ...middlewareSet, actions.track, responseMiddleware);
 
   router.use("/mailchimp", requireConfiguration, bodyParser.urlencoded({ extended: true }), actions.webhook, responseMiddleware);
 

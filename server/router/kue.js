@@ -26,7 +26,9 @@ export default function KueRouter({ shipConfig, queue }: any) {
   const router = Router();
 
   router.use(auth(shipConfig.hostSecret));
-  router.use("/_api", queue.adapter.app);
+  if (queue.adapter.app) {
+    router.use("/_api", queue.adapter.app);
+  }
   router.use("/", ui.app);
 
   return router;

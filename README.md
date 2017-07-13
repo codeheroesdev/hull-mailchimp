@@ -35,5 +35,5 @@ docker-compose run npm install dep -s
 
 These logs are specific for Mailchimp Connector :
   * info :
-    - request.sync.start - logged when starting updating segments to Mailchimp
+    - request.sync.out.start - logged when starting updating segments to Mailchimp
     - webhook.error - logged when encountered problems with webhook

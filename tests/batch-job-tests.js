@@ -10,9 +10,9 @@ import handleBatchExtract from "../server/jobs/handle-batch-extract";
 describe("handleBatchExtractJob", function EventsAgentTest() {
   it("should run extract data from json file", () => {
     const syncAgent = {
-      userAdded: () => { return true; },
+      userAdded: () => true,
       filterUserData: (u) => u,
-      userWhitelisted: function mocked() { return true; }
+      userWhitelisted: () => true
     };
     const syncAgentMock = sinon.mock(syncAgent);
     syncAgentMock.expects("userWhitelisted")
@@ -26,19 +26,7 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       enqueue: () => { return Promise.resolve(); },
       client: ClientMock()
     };
-    const ctxMockedWithUtils = {
-      client: {
-        utils: {
-          extract: {
-            handle: ({ body, batchSize, handler }) => {
-              return Promise.resolve([handler([
-                { id: "test", name: "test", segment_ids: ["1", "123"] }
-              ])]);
-            }
-          }
-        }
-      }
-    };
+
     return handleBatchExtract(
       ctx,
       {
@@ -66,20 +54,6 @@ describe("handleBatchExtractJob", function EventsAgentTest() {
       },
       enqueue: () => { return Promise.resolve(); },
       client: ClientMock()
-    };
-
-    const ctxMockedWithUtils = {
-      client: {
-        utils: {
-          extract: {
-            handle: ({ body, batchSize, handler }) => {
-              return Promise.resolve(handler([
-                { id: "test", name: "test", segment_ids: [1, 123] }
-              ]));
-            }
-          }
-        }
-      }
     };
 
     const contextEnqueueMock = sinon.mock(ctx);

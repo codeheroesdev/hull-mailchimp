@@ -1,6 +1,6 @@
-module.exports = function getClientMock() {
+module.exports = function getClientMock(private_settings) {
   return {
-    configuration: {},
+    configuration: () => private_settings,
     logger: {
       info: (msg, data) => console.log(msg, data),
       error: (msg, data) => console.log(msg, data),

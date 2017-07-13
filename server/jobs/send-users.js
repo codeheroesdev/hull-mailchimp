@@ -18,7 +18,7 @@ export default function sendUsersJob(ctx: any, payload: any) {
   const usersToAddToList = syncAgent.getUsersToAddToList(users);
   const usersToAddOrRemove = syncAgent.usersToAddOrRemove(users);
 
-  logger.debug("incoming.users.start", {
+  logger.debug("outgoing.users.start", {
     jobName: "update-users",
     type: "user",
     usersToAddToList: usersToAddToList.length,
@@ -45,7 +45,7 @@ export default function sendUsersJob(ctx: any, payload: any) {
       return syncAgent.saveToAudiences(usersToAddOrRemove);
     })
     .catch((err = {}) => {
-      logger.error("incoming.user.error", { errors: err.message });
+      logger.error("outgoing.user.error", { errors: err.message });
       return Promise.reject(err);
     });
 }

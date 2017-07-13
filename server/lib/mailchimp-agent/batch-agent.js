@@ -130,7 +130,8 @@ export default class MailchimpBatchAgent {
             }
           }))
           .wait()
-          .then(() => this.mailchimpClient.delete(`/batches/${batchId}`));
+          .then(() => this.mailchimpClient.delete(`/batches/${batchId}`))
+          .then(() => this.client.logger.info("outgoing.job.success", { jobName: "mailchimp-batch-job" }));
       });
   }
 }

@@ -6,7 +6,7 @@
  */
 export default function syncOutJob(ctx: any) {
   const { syncAgent } = ctx.shipApp;
-  ctx.client.logger.info("request.sync.start");
+  ctx.client.logger.info("request.sync.out.start");
 
   return syncAgent.segmentsMappingAgent.syncSegments()
     .then(() => syncAgent.interestsMappingAgent.syncInterests())

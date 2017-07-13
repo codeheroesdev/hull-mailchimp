@@ -54,7 +54,7 @@ export default class MailchimpBatchAgent {
       })
       .catch(err => {
         const filteredError = this.mailchimpClient.handleError(err);
-        this.client.logger.error("outgoing.job.error", { jobName: "mailchimp-batch-job", errors: filteredError.message });
+        this.client.logger.info("outgoing.job.error", { jobName: "mailchimp-batch-job", errors: filteredError.message });
         return Promise.reject(filteredError);
       });
   }
@@ -80,7 +80,7 @@ export default class MailchimpBatchAgent {
             });
           }
           this.metric.increment("batch_job.hanged", 1);
-          this.client.logger.error("outgoing.job.error", {
+          this.client.logger.info("outgoing.job.error", {
             jobName: "mailchimp-batch-job",
             data: _.omit(batchInfo, "_links"),
             errors: "batch_job_hanged" });

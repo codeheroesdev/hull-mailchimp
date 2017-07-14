@@ -99,12 +99,20 @@ export default class SyncAgent {
     }, {});
 
     const promises = _.map(req, (operation, audienceId) => {
+      console.log("Xdddd");
+      console.log(operation);
       return () => {
         return this.mailchimpClient
           .post(`/lists/${this.listId}/segments/${audienceId}`)
           .send(operation)
+          .then(
+            () => {
+              operation.members_to_add.map(userEmail => this.client.asUser(userEmail).logger.info("outgoing.user.success", { operation: "add" }));
+              operation.members_to_remove.map(userEmail => this.client.asUser(userEmail).logger.info("outgoing.user.success", { operation: "remove" }));
+            }
+          )
           .catch(err => {
-            this.logger.warn("Error modyfing static segments", err.message);
+            this.logger.error("outgoing.user.error", { errors: err.message });
             return Promise.reject(this.mailchimpClient.handleError(err));
           });
       };

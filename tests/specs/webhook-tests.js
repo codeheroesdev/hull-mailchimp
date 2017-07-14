@@ -52,7 +52,7 @@ describe("Mailchimp Connector", function notifyTests() {
   const firehoseMock = FirehoseMock();
 
   describe("webhook endpoint", () => {
-    it("should update user traits within Hull platform", (done) => {
+    it("should update user traits using firehose", (done) => {
       const postData = JSON.stringify({
         type: "subscribe",
         data: {

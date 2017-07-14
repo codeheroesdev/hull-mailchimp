@@ -12,7 +12,6 @@ import _ from "lodash";
 export default function sendUsersJob(ctx: any, payload: any) {
   const { users } = payload;
   const { mailchimpAgent, syncAgent } = ctx.shipApp;
-
   const { logger } = ctx.client;
 
   const usersToAddToList = syncAgent.getUsersToAddToList(users);

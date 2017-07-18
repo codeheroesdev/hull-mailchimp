@@ -2,7 +2,6 @@
 const Minihull = require("minihull");
 const http = require("http");
 const assert = require("assert");
-const nock = require("nock");
 
 const FirehoseMock = require("./firehose-mock");
 const bootstrap = require("./bootstrap");

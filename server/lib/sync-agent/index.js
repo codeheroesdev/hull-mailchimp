@@ -99,8 +99,6 @@ export default class SyncAgent {
     }, {});
 
     const promises = _.map(req, (operation, audienceId) => {
-      console.log("Xdddd");
-      console.log(operation);
       return () => {
         return this.mailchimpClient
           .post(`/lists/${this.listId}/segments/${audienceId}`)
